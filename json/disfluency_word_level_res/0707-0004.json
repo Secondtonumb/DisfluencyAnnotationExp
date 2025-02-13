@@ -1,0 +1,169 @@
+{
+  "uttid": "0707-0004",
+  "words": {
+    "sentence": [
+      "YOU",
+      "WANT",
+      "TO",
+      "SEARCH"
+    ],
+    "interval": [
+      [
+        0.03,
+        0.14
+      ],
+      [
+        0.14,
+        0.4
+      ],
+      [
+        0.4,
+        0.47
+      ],
+      [
+        0.47,
+        0.94
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.47,
+          0.94
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 2,
+      "fn": 1
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 3,
+      "fn": 1
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [
+        [
+          0.14,
+          0.4
+        ],
+        [
+          0.4,
+          0.47
+        ],
+        [
+          0.47,
+          0.94
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "f1": 0.5,
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "tp": 1,
+      "fp": 2,
+      "tn": 1,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [
+        [
+          0.47,
+          0.94
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 2,
+      "fn": 1
+    },
+    "zs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 3,
+      "fn": 1
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 3,
+      "fn": 1
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 3,
+      "fn": 1
+    }
+  }
+}

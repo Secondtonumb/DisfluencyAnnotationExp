@@ -1,0 +1,241 @@
+{
+  "uttid": "0721-0000",
+  "words": {
+    "sentence": [
+      "TODAY",
+      "I",
+      "THE",
+      "GENDER",
+      "GAP",
+      "IN",
+      "JAPAN"
+    ],
+    "interval": [
+      [
+        0.0,
+        0.53
+      ],
+      [
+        0.7,
+        1.0
+      ],
+      [
+        1.0,
+        1.22
+      ],
+      [
+        1.22,
+        2.56
+      ],
+      [
+        2.56,
+        3.85
+      ],
+      [
+        3.85,
+        4.02
+      ],
+      [
+        4.02,
+        4.7
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.0,
+          0.53
+        ],
+        [
+          0.7,
+          1.0
+        ],
+        [
+          1.0,
+          1.22
+        ],
+        [
+          1.22,
+          2.56
+        ],
+        [
+          2.56,
+          3.85
+        ],
+        [
+          3.85,
+          4.02
+        ],
+        [
+          4.02,
+          4.7
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 7,
+      "tn": 0,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 7,
+      "fn": 0
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 7,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [
+        [
+          1.22,
+          2.56
+        ],
+        [
+          2.56,
+          3.85
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 2,
+      "tn": 5,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 7,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [
+        [
+          1.0,
+          1.22
+        ],
+        [
+          1.22,
+          2.56
+        ],
+        [
+          2.56,
+          3.85
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 3,
+      "tn": 4,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 3,
+      "tn": 4,
+      "fn": 0
+    }
+  }
+}

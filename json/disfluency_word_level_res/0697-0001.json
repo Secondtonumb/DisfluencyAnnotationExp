@@ -1,0 +1,199 @@
+{
+  "uttid": "0697-0001",
+  "words": {
+    "sentence": [
+      "I",
+      "SHOULD",
+      "CONCENTRATE",
+      "ON",
+      "MY",
+      "CLASS",
+      "MORE"
+    ],
+    "interval": [
+      [
+        0.02,
+        0.13
+      ],
+      [
+        0.13,
+        0.5
+      ],
+      [
+        0.5,
+        1.7
+      ],
+      [
+        1.7,
+        1.87
+      ],
+      [
+        1.87,
+        2.03
+      ],
+      [
+        2.03,
+        2.64
+      ],
+      [
+        2.64,
+        3.11
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.5,
+          1.7
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 5,
+      "fn": 1
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 2
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 2
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 2
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          0.5,
+          1.7
+        ],
+        [
+          1.7,
+          1.87
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "f1": 0.5,
+      "precision": 0.5,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 1,
+      "tn": 4,
+      "fn": 1
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 2
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 5,
+      "fn": 1
+    }
+  }
+}

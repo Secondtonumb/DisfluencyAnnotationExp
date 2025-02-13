@@ -1,0 +1,168 @@
+{
+  "uttid": "0697-0000",
+  "words": {
+    "sentence": [
+      "I",
+      "SHOULD",
+      "HAVE",
+      "STUDIED",
+      "HARDER"
+    ],
+    "interval": [
+      [
+        0.0,
+        0.15
+      ],
+      [
+        0.15,
+        0.49
+      ],
+      [
+        0.49,
+        0.84
+      ],
+      [
+        0.84,
+        1.3
+      ],
+      [
+        1.3,
+        1.92
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.84,
+          1.3
+        ],
+        [
+          1.3,
+          1.92
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 2,
+      "tn": 3,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0
+    }
+  }
+}

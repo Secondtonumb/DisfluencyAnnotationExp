@@ -1,0 +1,190 @@
+{
+  "uttid": "0670-0000",
+  "words": {
+    "sentence": [
+      "THE",
+      "LAST",
+      "TOPIC",
+      "IS",
+      "ABOUT",
+      "IMPORT",
+      "REGULATIONS"
+    ],
+    "interval": [
+      [
+        0.01,
+        0.14
+      ],
+      [
+        0.14,
+        0.5
+      ],
+      [
+        0.5,
+        0.98
+      ],
+      [
+        0.98,
+        1.24
+      ],
+      [
+        1.24,
+        1.79
+      ],
+      [
+        1.85,
+        2.34
+      ],
+      [
+        2.36,
+        3.45
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          2.36,
+          3.45
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 1,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 6,
+      "fn": 1
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 6,
+      "fn": 1
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 6,
+      "fn": 1
+    },
+    "zs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 6,
+      "fn": 1
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 6,
+      "fn": 1
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "f1": 0.5,
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "tp": 1,
+      "fp": 2,
+      "tn": 4,
+      "fn": 0
+    }
+  }
+}

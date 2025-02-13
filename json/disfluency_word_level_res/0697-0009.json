@@ -1,0 +1,151 @@
+{
+  "uttid": "0697-0009",
+  "words": {
+    "sentence": [
+      "YOUR",
+      "THIRD",
+      "QUESTION",
+      "WAS"
+    ],
+    "interval": [
+      [
+        0.03,
+        0.38
+      ],
+      [
+        0.38,
+        0.72
+      ],
+      [
+        0.72,
+        1.53
+      ],
+      [
+        1.53,
+        1.94
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.38,
+          0.72
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 3,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 3,
+      "fn": 0
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "uttid": "0684-0001",
+  "words": {
+    "sentence": [
+      "YOU",
+      "WILL",
+      "BE",
+      "TO",
+      "CORRECTLY",
+      "AND",
+      "ENCOUNTER",
+      "DANGEROUS",
+      "SITUATIONS",
+      "IF",
+      "YOU",
+      "ARE",
+      "PANIC"
+    ],
+    "interval": [
+      [
+        0.02,
+        0.24
+      ],
+      [
+        0.24,
+        0.29
+      ],
+      [
+        0.29,
+        0.37
+      ],
+      [
+        0.37,
+        0.53
+      ],
+      [
+        0.53,
+        0.59
+      ],
+      [
+        0.6,
+        0.61
+      ],
+      [
+        0.61,
+        4.7
+      ],
+      [
+        4.7,
+        6.04
+      ],
+      [
+        6.04,
+        6.16
+      ],
+      [
+        6.16,
+        6.29
+      ],
+      [
+        6.29,
+        6.68
+      ],
+      [
+        6.68,
+        6.83
+      ],
+      [
+        6.83,
+        7.44
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          4.7,
+          6.04
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 12,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 13,
+      "fn": 0
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 13,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 13,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          0.61,
+          4.7
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 12,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [
+        [
+          0.61,
+          4.7
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 12,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 13,
+      "fn": 0
+    }
+  }
+}

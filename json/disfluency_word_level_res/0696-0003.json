@@ -1,0 +1,187 @@
+{
+  "uttid": "0696-0003",
+  "words": {
+    "sentence": [
+      "TOKUSHIMA",
+      "THIS",
+      "SUMMER"
+    ],
+    "interval": [
+      [
+        0.07,
+        4.12
+      ],
+      [
+        4.18,
+        4.78
+      ],
+      [
+        4.78,
+        4.88
+      ]
+    ],
+    "disfluency_label": [
+      1,
+      0,
+      1
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 1
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 1
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 1
+    },
+    "hs_based_D_on_src": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ],
+        [
+          4.18,
+          4.78
+        ],
+        [
+          4.78,
+          4.88
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        1,
+        1
+      ],
+      "f1": 0.8,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "tp": 2,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ],
+        [
+          4.18,
+          4.78
+        ],
+        [
+          4.78,
+          4.88
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        1,
+        1
+      ],
+      "f1": 0.8,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "tp": 2,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [
+        [
+          0.07,
+          4.12
+        ],
+        [
+          4.18,
+          4.78
+        ],
+        [
+          4.78,
+          4.88
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        1,
+        1
+      ],
+      "f1": 0.8,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "tp": 2,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        1,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 1
+    }
+  }
+}

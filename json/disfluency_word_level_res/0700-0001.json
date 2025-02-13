@@ -1,0 +1,196 @@
+{
+  "uttid": "0700-0001",
+  "words": {
+    "sentence": [
+      "I",
+      "SHOULD",
+      "CURE",
+      "THIS",
+      "HABIT",
+      "WELL"
+    ],
+    "interval": [
+      [
+        0.03,
+        0.2
+      ],
+      [
+        0.2,
+        0.63
+      ],
+      [
+        0.63,
+        1.03
+      ],
+      [
+        1.03,
+        1.22
+      ],
+      [
+        1.22,
+        1.79
+      ],
+      [
+        2.92,
+        3.6
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          2.92,
+          3.6
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 3,
+      "fn": 2
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 2
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [
+        [
+          2.92,
+          3.6
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 3,
+      "fn": 2
+    },
+    "hs_based_D_on_src": {
+      "interval": [
+        [
+          1.03,
+          1.22
+        ],
+        [
+          1.22,
+          1.79
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "f1": 0.5,
+      "precision": 0.5,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 1,
+      "tn": 3,
+      "fn": 1
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          2.92,
+          3.6
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 3,
+      "fn": 2
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 2
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 1.0,
+      "tp": 2,
+      "fp": 2,
+      "tn": 2,
+      "fn": 0
+    }
+  }
+}

@@ -1,0 +1,246 @@
+{
+  "uttid": "0736-0001",
+  "words": {
+    "sentence": [
+      "JUNIOR",
+      "HIGH",
+      "SCHOOL",
+      "IS",
+      "YEARS",
+      "HIGH",
+      "SCHOOL",
+      "FOR",
+      "FIVE",
+      "YEARS"
+    ],
+    "interval": [
+      [
+        0.01,
+        2.37
+      ],
+      [
+        2.37,
+        3.0
+      ],
+      [
+        3.0,
+        3.35
+      ],
+      [
+        3.35,
+        3.43
+      ],
+      [
+        3.43,
+        3.55
+      ],
+      [
+        3.55,
+        3.63
+      ],
+      [
+        3.63,
+        3.75
+      ],
+      [
+        3.75,
+        3.79
+      ],
+      [
+        3.79,
+        4.16
+      ],
+      [
+        4.16,
+        4.45
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          0.01,
+          2.37
+        ],
+        [
+          3.0,
+          3.35
+        ],
+        [
+          4.16,
+          4.45
+        ]
+      ],
+      "disfluency_label": [
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 3,
+      "tn": 7,
+      "fn": 0
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 10,
+      "fn": 0
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 10,
+      "fn": 0
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 10,
+      "fn": 0
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          2.37,
+          3.0
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 1,
+      "tn": 9,
+      "fn": 0
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 10,
+      "fn": 0
+    },
+    "ASR": {
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0.0,
+      "recall": 0,
+      "tp": 0,
+      "fp": 3,
+      "tn": 7,
+      "fn": 0
+    }
+  }
+}

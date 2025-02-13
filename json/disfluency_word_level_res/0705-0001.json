@@ -1,0 +1,203 @@
+{
+  "uttid": "0705-0001",
+  "words": {
+    "sentence": [
+      "IN",
+      "I",
+      "ALWAYS",
+      "GET",
+      "VARIOUS",
+      "TWITTER"
+    ],
+    "interval": [
+      [
+        0.02,
+        0.06
+      ],
+      [
+        0.06,
+        0.26
+      ],
+      [
+        0.26,
+        1.16
+      ],
+      [
+        1.16,
+        1.81
+      ],
+      [
+        1.81,
+        4.09
+      ],
+      [
+        4.09,
+        4.25
+      ]
+    ],
+    "disfluency_label": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "att_based_D_on_src": {
+      "interval": [
+        [
+          1.81,
+          4.09
+        ],
+        [
+          4.09,
+          4.25
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "f1": 0.5,
+      "precision": 0.5,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 1,
+      "tn": 3,
+      "fn": 1
+    },
+    "hs_based_D_on_src_novc": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 2
+    },
+    "zs_based_D_on_src_novc": {
+      "interval": [
+        [
+          0.06,
+          0.26
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "tn": 4,
+      "fn": 1
+    },
+    "hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 2
+    },
+    "zs_based_D_on_src": {
+      "interval": [
+        [
+          0.26,
+          1.16
+        ],
+        [
+          1.81,
+          4.09
+        ],
+        [
+          4.09,
+          4.25
+        ]
+      ],
+      "disfluency_label": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1
+      ],
+      "f1": 0.4,
+      "precision": 0.3333333333333333,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 2,
+      "tn": 2,
+      "fn": 1
+    },
+    "zs_hs_based_D_on_src": {
+      "interval": [],
+      "disfluency_label": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "f1": 0,
+      "precision": 0,
+      "recall": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 4,
+      "fn": 2
+    },
+    "ASR": {
+      "disfluency_label": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      "f1": 0.28571428571428575,
+      "precision": 0.2,
+      "recall": 0.5,
+      "tp": 1,
+      "fp": 4,
+      "tn": 0,
+      "fn": 1
+    }
+  }
+}
