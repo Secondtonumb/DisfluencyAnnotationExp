@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio & TextGrid Annotation Player – Word Tier with Persistent Score Coloring</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    /* Waveform container with relative positioning for the playhead */
+    #waveform {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    /* The moving playhead (red cursor) */
+    #cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+    }
+    /* Container for the annotation tier */
+    #annotations {
+      width: 100%;
+    }
+    .annotation-tier {
+      position: relative;
+      height: 30px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      background: white; /* Initially white */
+    }
+    .annotation-tier h3 {
+      margin: 0;
+      padding: 0 5px;
+      font-size: 14px;
+      background: #eee;
+      line-height: 30px;
+    }
+    /* Each word interval is absolutely positioned within the tier */
+    .annotation-interval {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 30px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      background-color: white; /* Initially white */
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio & TextGrid Annotation Player – Word Tier with Persistent Score Coloring</h1>
+  
+  <!-- Waveform container with a red playhead cursor -->
+  <div id="waveform">
+    <div id="cursor"></div>
+  </div>
+  
+  <!-- Annotation tier: only the Word tier is shown -->
+  <div id="annotations">
+    <div id="word-tier" class="annotation-tier">
+    </div>
+  </div>
+  
+  <!-- Include WaveSurfer v5.2.0 -->
+  <script src="https://unpkg.com/wavesurfer.js@5.2.0/dist/wavesurfer.min.js"></script>
+  <script>
+    // The TextGrid header defines an overall time of 2.19 seconds.
+    const textGridDuration = 2.16;
+    
+    // Define the annotation data for the Word and Word Score tiers.
+    // (We assume these arrays are in corresponding order.)
+    const annotations = {
+      word: [
+        { xmin: 0.03, xmax: 0.26, text: "WHAT" },
+        { xmin: 0.26, xmax: 0.5,  text: "DOES" },
+        { xmin: 0.5,  xmax: 0.99, text: "COLLEGE" },
+        { xmin: 0.99, xmax: 1.39, text: "LIFE" },
+        { xmin: 1.39, xmax: 1.73, text: "MEANS" },
+        { xmin: 1.73, xmax: 1.85, text: "TO" },
+        { xmin: 1.85, xmax: 2.16, text: "ME" }
+      ],
+      word_score: [
+        { xmin: 0.03, xmax: 0.26, text: "1.0483" },
+        { xmin: 0.26, xmax: 0.5,  text: "0.8103" },
+        { xmin: 0.5,  xmax: 0.99, text: "0.9881" },
+        { xmin: 0.99, xmax: 1.39, text: "0.8574" },
+        { xmin: 1.39, xmax: 1.73, text: "1.7004" },
+        { xmin: 1.73, xmax: 1.85, text: "3.0172" },
+        { xmin: 1.85, xmax: 2.16, text: "1.5572" }
+      ]
+    };
+
+    // Helper function: get the maximum xmax value for a given tier.
+    function getTierMax(tierData) {
+      return Math.max(...tierData.map(a => a.xmax));
+    }
+    
+    // Create the WaveSurfer instance.
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#a0a0a0',
+      height: 200,
+      backend: 'WebAudio'
+    });
+    
+    wavesurfer.on('error', (e) => {
+      console.error('WaveSurfer error:', e);
+    });
+    
+    // Load the audio file (update the path as needed).
+    wavesurfer.load("./wav/V000_R_max_valid/0002-0000.wav");
+    
+    // Once the audio is ready, compute the alignment duration and populate the Word tier.
+    wavesurfer.on('ready', () => {
+      const audioDuration = wavesurfer.getDuration();
+      const wordMax = getTierMax(annotations.word);
+      const wordScoreMax = getTierMax(annotations.word_score);
+      // Use the shortest duration among the audio, the header, and the tier data.
+      const totalDuration = Math.min(audioDuration, textGridDuration, wordMax, wordScoreMax);
+      
+      const container = document.getElementById('word-tier');
+      
+      // Populate the Word tier with intervals.
+      // (We assume both arrays have the same length and order.)
+      annotations.word.forEach((wordAnnotation, index) => {
+        const scoreAnnotation = annotations.word_score[index];
+        const score = parseFloat(scoreAnnotation.text);
+        const div = document.createElement('div');
+        div.classList.add('annotation-interval');
+        div.textContent = wordAnnotation.text;
+        // Store the score and a "played" flag as data attributes.
+        div.dataset.score = score;
+        div.dataset.played = "false"; // Initially not played.
+        
+        // Compute horizontal positioning relative to totalDuration.
+        const leftPercent = (wordAnnotation.xmin / totalDuration) * 100;
+        const widthPercent = ((wordAnnotation.xmax - wordAnnotation.xmin) / totalDuration) * 100;
+        div.style.left = leftPercent + '%';
+        div.style.width = widthPercent + '%';
+        // Initially, the background color remains white.
+        
+        // Clicking the word plays its corresponding segment.
+        div.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wavesurfer.play(wordAnnotation.xmin, wordAnnotation.xmax);
+        });
+        
+        container.appendChild(div);
+      });
+      
+      // Store totalDuration for later use.
+      wavesurfer.totalDurationForAnnotations = totalDuration;
+    });
+    
+    // Update the playhead cursor and lock in color once an interval is played.
+    wavesurfer.on('audioprocess', (currentTime) => {
+      const waveformElem = document.getElementById('waveform');
+      const cursor = document.getElementById('cursor');
+      // Position the cursor based on the audio's current time.
+      cursor.style.left = ((currentTime / wavesurfer.getDuration()) * waveformElem.clientWidth) + 'px';
+      
+      // Use the computed totalDuration for positioning the annotations.
+      const totalDuration = wavesurfer.totalDurationForAnnotations || wavesurfer.getDuration();
+      
+      // For each word interval, if it has not been marked as "played", check whether
+      // the playhead is inside its time span. If yes, set its background color (red if score > 1.5, blue otherwise)
+      // and mark it as played.
+      document.querySelectorAll('#word-tier .annotation-interval').forEach(div => {
+        if (div.dataset.played === "true") {
+          // Already played—keep its color.
+          return;
+        }
+        const leftPercent = parseFloat(div.style.left);
+        const widthPercent = parseFloat(div.style.width);
+        const annotationStart = (leftPercent / 100) * totalDuration;
+        const annotationEnd = ((leftPercent + widthPercent) / 100) * totalDuration;
+        if (currentTime >= annotationStart && currentTime < annotationEnd) {
+          const score = parseFloat(div.dataset.score);
+          div.style.backgroundColor = (score > 1.5) ? 'red' : 'blue';
+          div.dataset.played = "true"; // Mark as played so the color stays.
+        } else {
+          // If not played yet and not currently active, keep it white.
+          div.style.backgroundColor = 'white';
+        }
+      });
+    });
+    
+    // Toggle play/pause when clicking the waveform.
+    document.getElementById('waveform').addEventListener('click', () => {
+      wavesurfer.playPause();
+    });
+  </script>
+</body>
+</html>

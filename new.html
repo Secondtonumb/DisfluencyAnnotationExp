@@ -1,0 +1,205 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjective Evaluation UI</title>
+    <style>
+        .evaluation-container {
+            width: 80%;
+            margin: auto;
+            text-align: center;
+        }
+        .audio-container {
+            margin-bottom: 20px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        .image-item {
+            position: relative;
+            width: 18%;
+            text-align: center;
+        }
+        .mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+        .ranking {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="evaluation-container">
+        <div class="audio-container">
+            <audio id="audio" controls>
+                <source src="./wav/V000_R_max_valid/0668-0004.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <div class="image-container" id="imageContainer">
+            <div class="image-item">
+                <img src="fig/zs_hs_out/0668-0004.png" alt="Intelligibility 5" width="100%">
+                <div class="mask"></div>
+                <p>5</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 4" width="100%">
+                <div class="mask"></div>
+                <p>4</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 3" width="100%">
+                <div class="mask"></div>
+                <p>3</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 2" width="100%">
+                <div class="mask"></div>
+                <p>2</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 1" width="100%">
+                <div class="mask"></div>
+                <p>1</p>
+            </div>
+        </div>
+        <div class="ranking">
+            <label for="rankingSelect">Select the best intelligibility:</label>
+            <select id="rankingSelect">
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+            </select>
+        </div>
+    </div>
+    <script>
+        document.getElementById("audio").addEventListener("play", function() {
+            let imageContainer = document.getElementById("imageContainer");
+            imageContainer.style.opacity = "1";
+            
+            let images = document.querySelectorAll(".image-item .mask");
+            let audio = this;
+            let duration = audio.duration;
+            
+            if (isNaN(duration) || duration === 0) {
+                console.error("Audio duration not available");
+                return;
+            }
+            
+            let revealTime = duration / images.length;
+            images.forEach((mask, index) => {
+                setTimeout(() => {
+                    mask.style.display = "none";
+                }, revealTime * index * 1000);
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjective Evaluation UI</title>
+    <style>
+        .evaluation-container {
+            width: 80%;
+            margin: auto;
+            text-align: center;
+        }
+        .audio-container {
+            margin-bottom: 20px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+            opacity: 1;
+        }
+        .image-item {
+            position: relative;
+            width: 18%;
+            text-align: center;
+        }
+        .mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+        .ranking {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="evaluation-container">
+        <div class="audio-container">
+            <audio id="audio" controls>
+                <source src="./wav/V000_R_max_valid/0668-0004.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <div class="image-container" id="imageContainer">
+            <div class="image-item">
+                <img src="fig/zs_hs_out/0668-0004.png" alt="Intelligibility 5" width="100%">
+                <div class="mask"></div>
+                <p>5</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 4" width="100%">
+                <div class="mask"></div>
+                <p>4</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 3" width="100%">
+                <div class="mask"></div>
+                <p>3</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 2" width="100%">
+                <div class="mask"></div>
+                <p>2</p>
+            </div>
+            <div class="image-item">
+                <img src="fig/hs_out/0668-0004.png" alt="Intelligibility 1" width="100%">
+                <div class="mask"></div>
+                <p>1</p>
+            </div>
+        </div>
+        <div class="ranking">
+            <label for="rankingSelect">Select the best intelligibility:</label>
+            <select id="rankingSelect">
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+            </select>
+        </div>
+    </div>
+    <script>
+        document.getElementById("audio").addEventListener("play", function() {
+            let images = document.querySelectorAll(".image-item .mask");
+            images.forEach(mask => mask.style.display = "none");
+        });
+    </script>
+</body>
+</html>

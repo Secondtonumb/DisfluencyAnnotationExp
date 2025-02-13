@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disfluency Annotation Experiment – Final Version</title>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      transition: background-color 0.5s ease;
+    }
+    /* Start Page */
+    #start-page {
+      text-align: center;
+      padding: 50px;
+    }
+    #start-page input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      margin: 10px 0;
+    }
+    #start-page label {
+      font-size: 16px;
+      margin: 5px 0;
+      display: block;
+    }
+    #start-page button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    /* Saved Progress Section */
+    #saved-progress-section {
+      margin-top: 20px;
+    }
+    /* Experiment Page */
+    #experiment-page {
+      display: none;
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+    #instructions {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+      font-size: 18px;
+    }
+    #file-id {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    /* Waveform Block */
+    #waveform {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #f2f2f2;
+      border: 1px solid #ccc;
+      pointer-events: none;
+      user-select: none;
+      margin-bottom: 15px;
+    }
+    #cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+    }
+    /* Overlay for Annotation */
+    #draw-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* enabled in editing mode */
+    }
+    /* Container for word overlays on waveform */
+    #word-overlays {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    /* Annotation (Textgrid) Block */
+    #annotation-block {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+    }
+    #annotation-block h3 {
+      margin: 0;
+      padding: 5px;
+      background: #eee;
+      font-size: 16px;
+    }
+    #editor-content {
+      position: relative;
+      height: 80px;
+      width: 100%;
+      pointer-events: none; /* non-interactive in Phase 1 */
+    }
+    /* Textgrid Result Block (with timestamps) */
+    #textgrid-result {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #fcfcfc;
+      font-family: monospace;
+      font-size: 14px;
+      display: none;  /* Only shown after audio finishes */
+    }
+    /* Confirm Block */
+    #confirm-block {
+      text-align: center;
+      margin-top: 15px;
+      display: none; /* Only shown after audio finishes or editing */
+    }
+    /* Navigation Block */
+    #navigation {
+      text-align: center;
+      margin-top: 20px;
+    }
+    /* Large Button Styles */
+    .large-btn {
+      font-size: 20px;
+      padding: 15px 25px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    .large-btn:hover {
+      background-color: #ffcc00;
+    }
+    /* Specific Button Colors */
+    #annotate-button {
+      background-color: #009688;
+      color: #fff;
+    }
+    #annotate-button:hover {
+      background-color: #00796b;
+    }
+    #edit-annotations-button {
+      background-color: #3f51b5;
+      color: #fff;
+    }
+    #edit-annotations-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #edit-annotations-button:hover:disabled {
+      background-color: #ccc;
+    }
+    #confirm-button {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    #confirm-button:hover {
+      background-color: #388e3c;
+    }
+    #prev-page, #next-page {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    #prev-page:hover, #next-page:hover {
+      background-color: #388e3c;
+    }
+    /* Disabled navigation buttons */
+    #prev-page:disabled, #next-page:disabled {
+      background-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+    /* Word boxes in Textgrid: clickable only in editing mode */
+    .word {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 14px;
+      box-sizing: border-box;
+      background-color: white;
+      color: #37474F;
+      transition: background-color 0.2s ease, border 0.2s ease;
+      cursor: pointer;
+    }
+    .word.highlight {
+      background-color: #FFF3E0 !important;
+      color: #BF360C;
+      font-weight: bold;
+      border: 1px solid #333;
+    }
+    /* Overlay for toggled words on waveform */
+    .word-overlay {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      background-color: rgba(255, 200, 0, 0.3);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Start Page -->
+  <div id="start-page">
+    <h1>Disfluency Annotation Experiment</h1>
+    <p>Please enter your name to begin:</p>
+    <input type="text" id="rater-name" placeholder="Your Name">
+    <br>
+    <!-- Options -->
+    <label><input type="checkbox" id="toggle-method-labels"> Show Method Labels</label>
+    <label><input type="checkbox" id="shuffle-methods"> Shuffle Methods</label>
+    <label>
+      Methods to evaluate (comma-separated; leave blank for all):
+      <input type="text" id="selected-methods" placeholder="e.g. ground, att_based_D_on_src, zs_hs_based_D_on_src">
+    </label>
+    <br>
+    <!-- Saved Progress -->
+    <div id="saved-progress-section" style="display: none;">
+      <p>You have saved progress. Would you like to continue where you left off?</p>
+      <button id="continue-saved">Continue Saved Experiment</button>
+      <button id="start-new">Start New Experiment</button>
+    </div>
+    <button id="start-experiment">Start Experiment</button>
+  </div>
+  
+  <!-- Experiment Page -->
+  <div id="experiment-page">
+    <!-- Instructions -->
+    <div id="instructions">
+      <p><strong>Step 1:</strong> Play the audio and <em>click & hold</em> the "Annotate" button to mark your annotation while listening.<br>
+         (Editing button is disabled until you finish listening.)</p>
+      <p><strong>Step 2:</strong> When the audio is finished, your annotation and a textgrid (with timestamps) will be displayed.</p>
+      <p><strong>Step 3.1:</strong> If you are satisfied, click the <strong>Confirm</strong> button (the Next button remains inactive until Confirm is clicked).<br>
+         <strong>Step 3.2:</strong> If not, click <strong>Start Editing</strong> to adjust your annotation. In editing mode the Annotate button is re-enabled and the textgrid becomes interactive. When finished, click Confirm to update the result.</p>
+      <p><strong>Step 4:</strong> Click Next for the next annotation.</p>
+    </div>
+    <div id="file-id"></div>
+    <!-- Waveform Block -->
+    <div id="waveform">
+      <div id="cursor"></div>
+      <div id="draw-overlay">
+        <!-- Word overlays will be appended here -->
+        <div id="word-overlays"></div>
+      </div>
+    </div>
+    <!-- Control Block -->
+    <div id="controls" style="text-align: center;">
+      <button id="annotate-button" class="large-btn">Click & Hold to Annotate</button>
+      <button id="edit-annotations-button" class="large-btn" disabled>Start Editing</button>
+    </div>
+    <!-- Confirm Block -->
+    <div id="confirm-block" style="text-align: center; display: none;">
+      <button id="confirm-button" class="large-btn">Confirm</button>
+    </div>
+    <!-- Annotation (Textgrid) Block -->
+    <div id="annotation-block">
+      <h3>Your Annotation</h3>
+      <div id="editor-content"></div>
+    </div>
+    <!-- Textgrid Result Block (with timestamps) -->
+    <div id="textgrid-result"></div>
+    <!-- Navigation Block -->
+    <div id="navigation">
+      <button id="prev-page" class="large-btn">Previous</button>
+      <span id="page-info"></span>
+      <button id="next-page" class="large-btn" disabled>Next</button>
+    </div>
+    <div style="text-align: center;">
+      <button id="save-result" class="large-btn">Save Result (CSV)</button>
+      <button id="finish-button" class="large-btn">Finish & Download CSV</button>
+    </div>
+    <!-- Results Section for Predicted Tiers (if needed) -->
+    <div id="results" style="display:none;">
+      <h2>Annotation Results</h2>
+      <div id="predicted-tiers"></div>
+    </div>
+  </div>
+  
+  <!-- Wavesurfer Library -->
+  <script src="https://unpkg.com/wavesurfer.js@5.2.0/dist/wavesurfer.min.js"></script>
+  <script>
+    /***********************
+     * Load File IDs and Method List
+     ***********************/
+    const audioDir = "./wav/V000_R_max_valid/";
+    const jsonDir = "./json/disfluency_word_level_res/";
+    let idList = [];
+    fetch("./wav/output_part_4.scp")
+      .then(response => {
+        if (!response.ok) throw new Error("Error loading test.scp: " + response.statusText);
+        return response.text();
+      })
+      .then(text => {
+        idList = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        console.log("Loaded idList:", idList);
+      })
+      .catch(err => console.error(err));
+    
+    let globalMethodList = [];
+    fetch("wav/methods.list")
+      .then(response => {
+        if (!response.ok) throw new Error("Error loading methods.list: " + response.statusText);
+        return response.text();
+      })
+      .then(text => {
+        globalMethodList = text.split(/\r?\n|,/).map(l => l.trim()).filter(Boolean);
+        console.log("Loaded Methods:", globalMethodList);
+      })
+      .catch(err => console.error(err));
+    
+    /***********************
+     * GLOBAL VARIABLES
+     ***********************/
+    let currentIndex = 0;
+    let currentJsonData = null;
+    let raterName = "";
+    // Annotation intervals (in seconds)
+    let editorIntervals = [];       // from Phase 1 (normal annotation)
+    let editorModeIntervals = [];   // from Phase 2 (editing mode)
+    // Per-word annotation flags (true = annotated)
+    let userWordAnnotationFlags = [];
+    // Object to store results for each file
+    let resultsPerFile = {};
+    
+    // Global settings from start page.
+    let globalShowMethodLabels = false;
+    let globalShuffleMethods = false;
+    let globalSelectedMethods = null;
+    
+    let isEditorMode = false;  // flag for editing mode
+    
+    const STORAGE_KEY = "disfluencyProgress";
+    
+    /***********************
+     * WAVESURFER SETUP
+     ***********************/
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#a0a0a0',
+      height: 200,
+      backend: 'WebAudio',
+      responsive: true
+    });
+    const cursor = document.getElementById('cursor');
+    wavesurfer.on('audioprocess', currentTime => {
+      const duration = wavesurfer.getDuration();
+      const containerWidth = wavesurfer.drawer.wrapper.clientWidth;
+      cursor.style.left = ((currentTime / duration) * containerWidth) + 'px';
+    });
+    
+    window.addEventListener('keydown', e => {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        wavesurfer.playPause();
+      }
+    });
+    
+    /***********************
+     * Start Page Interaction
+     ***********************/
+    window.addEventListener('load', () => {
+      if (localStorage.getItem(STORAGE_KEY)) {
+        document.getElementById('saved-progress-section').style.display = 'block';
+        document.getElementById('start-experiment').style.display = 'none';
+      } else {
+        document.getElementById('saved-progress-section').style.display = 'none';
+        document.getElementById('start-experiment').style.display = 'inline-block';
+      }
+    });
+    
+    document.getElementById('start-new').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('saved-progress-section').style.display = 'none';
+      document.getElementById('start-experiment').style.display = 'inline-block';
+    });
+    
+    document.getElementById('continue-saved').addEventListener('click', () => {
+      const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (savedData) {
+        raterName = savedData.raterName;
+        currentIndex = savedData.currentIndex;
+        resultsPerFile = savedData.resultsPerFile;
+        globalShowMethodLabels = savedData.globalShowMethodLabels;
+        globalShuffleMethods = savedData.globalShuffleMethods;
+        globalSelectedMethods = savedData.globalSelectedMethods;
+        document.getElementById('rater-name').value = raterName;
+        document.getElementById('toggle-method-labels').checked = globalShowMethodLabels;
+        document.getElementById('shuffle-methods').checked = globalShuffleMethods;
+        document.getElementById('selected-methods').value = globalSelectedMethods ? globalSelectedMethods.join(', ') : "";
+        document.getElementById('start-page').style.display = 'none';
+        document.getElementById('experiment-page').style.display = 'block';
+        loadCurrentFile();
+      }
+    });
+    
+    document.getElementById('start-experiment').addEventListener('click', () => {
+      const nameInput = document.getElementById('rater-name').value.trim();
+      if (!nameInput) {
+        alert("Please enter your name.");
+        return;
+      }
+      raterName = nameInput;
+      globalShowMethodLabels = document.getElementById('toggle-method-labels').checked;
+      globalShuffleMethods = document.getElementById('shuffle-methods').checked;
+      let methodsInput = document.getElementById('selected-methods').value.trim();
+      if (methodsInput !== "") {
+        globalSelectedMethods = methodsInput.split(/[\s,]+/).map(s => s.trim()).filter(s => s !== "");
+      } else {
+        globalSelectedMethods = null;
+      }
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('start-page').style.display = 'none';
+      document.getElementById('experiment-page').style.display = 'block';
+      loadCurrentFile();
+    });
+    
+    /***********************
+     * LOAD CURRENT FILE
+     ***********************/
+    function loadCurrentFile() {
+      const fileId = idList[currentIndex];
+      document.getElementById('file-id').textContent = "File ID: " + fileId + "  (Hit Space Bar to Play/Pause)";
+      document.getElementById('page-info').textContent = "File " + (currentIndex + 1) + " of " + idList.length;
+      document.getElementById('results').style.display = 'none';
+      // Clear previous annotation results and textgrid result.
+      editorIntervals = [];
+      editorModeIntervals = [];
+      document.getElementById('textgrid-result').innerHTML = "";
+      document.getElementById('textgrid-result').style.display = "none";
+      // Clear annotation block content.
+      document.getElementById('editor-content').innerHTML = "";
+      // Clear draw-overlay content.
+      document.getElementById('draw-overlay').innerHTML = "";
+      // Re-create word overlays container.
+      const wordOverlays = document.createElement('div');
+      wordOverlays.id = "word-overlays";
+      wordOverlays.style.position = "absolute";
+      wordOverlays.style.top = "0";
+      wordOverlays.style.left = "0";
+      wordOverlays.style.width = "100%";
+      wordOverlays.style.height = "100%";
+      wordOverlays.style.pointerEvents = "none";
+      document.getElementById('draw-overlay').appendChild(wordOverlays);
+      
+      // Ensure editing mode is off.
+      isEditorMode = false;
+      document.getElementById('edit-annotations-button').textContent = "Start Editing";
+      document.getElementById('edit-annotations-button').disabled = true;  // remain disabled until audio finishes
+      document.getElementById('draw-overlay').style.pointerEvents = "none";
+      // In Phase 1, annotate button is active; textgrid is non-interactive.
+      document.getElementById('annotate-button').disabled = false;
+      document.getElementById('editor-content').style.pointerEvents = "none";
+      document.body.style.backgroundColor = "#ffffff";
+      
+      // Disable Next button until Confirm is clicked.
+      document.getElementById('next-page').disabled = true;
+      // Hide the Confirm block.
+      document.getElementById('confirm-block').style.display = "none";
+      
+      // Load JSON.
+      fetch(`${jsonDir}${fileId}.json`)
+        .then(r => r.ok ? r.json() : Promise.reject("Error loading JSON for " + fileId))
+        .then(jsonData => {
+          currentJsonData = jsonData;
+          console.log("Loaded JSON for", fileId, jsonData);
+        })
+        .catch(err => {
+          console.error(err);
+          alert(err);
+        });
+      
+      // Load audio.
+      wavesurfer.load(`${audioDir}${fileId}.wav`);
+    }
+    
+    /***********************
+     * When Audio Finishes (Phase 1):
+     * Display annotation result and textgrid; enable Confirm button and Edit button.
+     ***********************/
+    wavesurfer.on('finish', () => {
+      // Always display results regardless of whether an annotation interval was recorded.
+      displayResults();
+      document.getElementById('annotate-button').disabled = true;
+      // Show Confirm block.
+      document.getElementById('confirm-block').style.display = "block";
+      // Enable editing button.
+      document.getElementById('edit-annotations-button').disabled = false;
+    });
+    
+    /***********************
+     * Normal Annotation (Phase 1)
+     ***********************/
+    let annotationStartTime = 0;
+    let annotationIntervalID = null;
+    let currentOverlay = null;
+    
+    document.getElementById('annotate-button').addEventListener('mousedown', () => {
+      if (isEditorMode) return;
+      annotationStartTime = wavesurfer.getCurrentTime();
+      currentOverlay = document.createElement('div');
+      currentOverlay.style.position = 'absolute';
+      currentOverlay.style.top = '0';
+      currentOverlay.style.height = '100%';
+      currentOverlay.style.backgroundColor = 'rgba(0, 150, 136, 0.3)';
+      currentOverlay.style.border = '1px solid #009688';
+      currentOverlay.style.pointerEvents = 'none';
+      document.getElementById('draw-overlay').appendChild(currentOverlay);
+      annotationIntervalID = setInterval(() => {
+        const currentTime = wavesurfer.getCurrentTime();
+        const dur = wavesurfer.getDuration();
+        const wWidth = wavesurfer.drawer.wrapper.clientWidth;
+        const startX = (annotationStartTime / dur) * wWidth;
+        const currentX = (currentTime / dur) * wWidth;
+        currentOverlay.style.left = startX + 'px';
+        currentOverlay.style.width = Math.max(0, currentX - startX) + 'px';
+      }, 50);
+    });
+    
+    document.getElementById('annotate-button').addEventListener('mouseup', () => {
+      if (!currentOverlay) return;
+      clearInterval(annotationIntervalID);
+      annotationIntervalID = null;
+      const annotationEndTime = wavesurfer.getCurrentTime();
+      if (annotationEndTime > annotationStartTime) {
+        editorIntervals.push({ start: annotationStartTime, end: annotationEndTime });
+        console.log("Recorded annotation:", { start: annotationStartTime, end: annotationEndTime });
+      }
+      currentOverlay = null;
+    });
+    
+    document.getElementById('annotate-button').addEventListener('mouseleave', () => {
+      if (currentOverlay) {
+        clearInterval(annotationIntervalID);
+        annotationIntervalID = null;
+        const annotationEndTime = wavesurfer.getCurrentTime();
+        if (annotationEndTime > annotationStartTime) {
+          editorIntervals.push({ start: annotationStartTime, end: annotationEndTime });
+        }
+        currentOverlay = null;
+      }
+    });
+    
+    /***********************
+     * Editing Mode Toggle (Phase 2)
+     ***********************/
+    document.getElementById('edit-annotations-button').addEventListener('click', () => {
+      isEditorMode = !isEditorMode;
+      if (isEditorMode) {
+        // Enter editing mode:
+        document.getElementById('edit-annotations-button').textContent = "Finish Editing";
+        document.getElementById('draw-overlay').style.pointerEvents = "auto";
+        document.body.style.backgroundColor = "#e0f7fa";
+        // Re-enable annotation and textgrid interaction.
+        document.getElementById('annotate-button').disabled = false;
+        document.getElementById('editor-content').style.pointerEvents = "auto";
+      } else {
+        // Exit editing mode:
+        document.getElementById('edit-annotations-button').textContent = "Start Editing";
+        document.getElementById('draw-overlay').style.pointerEvents = "none";
+        document.body.style.backgroundColor = "#ffffff";
+        if (editorModeIntervals.length > 0) {
+          editorIntervals = editorIntervals.concat(editorModeIntervals);
+          editorModeIntervals = [];
+        }
+        initializeUserWordAnnotations();
+        renderUserTier();
+        updateWaveformWordOverlays();
+        displayTextgridResult();
+        // Disable editing interactivity after finishing editing.
+        document.getElementById('annotate-button').disabled = true;
+        document.getElementById('editor-content').style.pointerEvents = "none";
+        // Show Confirm block so user can click Confirm to enable Next.
+        document.getElementById('confirm-block').style.display = "block";
+      }
+    });
+    
+    /***********************
+     * Editing Mode Drawing on Waveform (Phase 2)
+     ***********************/
+    const drawOverlay = document.getElementById('draw-overlay');
+    let editorModeStartX = 0;
+    let editorModeCurrentOverlay = null;
+    
+    drawOverlay.addEventListener('mousedown', (e) => {
+      if (!isEditorMode) return;
+      const overlayRect = drawOverlay.getBoundingClientRect();
+      editorModeStartX = e.pageX - overlayRect.left;
+      editorModeCurrentOverlay = document.createElement('div');
+      editorModeCurrentOverlay.style.position = 'absolute';
+      editorModeCurrentOverlay.style.top = '0';
+      editorModeCurrentOverlay.style.height = '100%';
+      editorModeCurrentOverlay.style.backgroundColor = 'rgba(0, 0, 255, 0.3)';
+      editorModeCurrentOverlay.style.border = '1px solid blue';
+      editorModeCurrentOverlay.style.left = editorModeStartX + 'px';
+      drawOverlay.appendChild(editorModeCurrentOverlay);
+    });
+    
+    drawOverlay.addEventListener('mousemove', (e) => {
+      if (!isEditorMode || !editorModeCurrentOverlay) return;
+      const overlayRect = drawOverlay.getBoundingClientRect();
+      let currentX = e.pageX - overlayRect.left;
+      let width = currentX - editorModeStartX;
+      if (width >= 0) {
+        editorModeCurrentOverlay.style.width = width + 'px';
+      } else {
+        editorModeCurrentOverlay.style.left = currentX + 'px';
+        editorModeCurrentOverlay.style.width = Math.abs(width) + 'px';
+      }
+    });
+    
+    drawOverlay.addEventListener('mouseup', (e) => {
+      if (!isEditorMode || !editorModeCurrentOverlay) return;
+      const overlayRect = drawOverlay.getBoundingClientRect();
+      let endX = e.pageX - overlayRect.left;
+      let startX = Math.min(editorModeStartX, endX);
+      let endXCorrect = Math.max(editorModeStartX, endX);
+      const wWidth = wavesurfer.drawer.wrapper.clientWidth;
+      const duration = wavesurfer.getDuration();
+      let startTime = (startX / wWidth) * duration;
+      let endTime = (endXCorrect / wWidth) * duration;
+      editorModeIntervals.push({ start: startTime, end: endTime });
+      editorModeCurrentOverlay = null;
+      initializeUserWordAnnotations();
+      renderUserTier();
+      updateWaveformWordOverlays();
+    });
+    
+    /***********************
+     * Per-word Annotation Functions
+     ***********************/
+    function initializeUserWordAnnotations() {
+      const words = currentJsonData.words.sentence;
+      const intervals = currentJsonData.words.interval;
+      userWordAnnotationFlags = new Array(words.length).fill(false);
+      const combinedIntervals = editorIntervals.concat(editorModeIntervals);
+      words.forEach((word, i) => {
+        const mid = (intervals[i][0] + intervals[i][1]) / 2;
+        combinedIntervals.forEach(interval => {
+          if (mid >= interval.start && mid <= interval.end) {
+            userWordAnnotationFlags[i] = true;
+          }
+        });
+      });
+    }
+    
+    function renderUserTier() {
+      const words = currentJsonData.words.sentence;
+      const intervals = currentJsonData.words.interval;
+      const totalDuration = intervals[intervals.length - 1][1];
+      const editorContentDiv = document.getElementById('editor-content');
+      editorContentDiv.innerHTML = "";
+      
+      words.forEach((word, idx) => {
+        const intv = intervals[idx];
+        const leftPercent = (intv[0] / totalDuration) * 100;
+        const widthPercent = ((intv[1] - intv[0]) / totalDuration) * 100;
+        const span = document.createElement('div');
+        span.classList.add('word');
+        span.textContent = word;
+        span.style.left = leftPercent + '%';
+        span.style.width = widthPercent + '%';
+        if (isEditorMode) {
+          span.style.pointerEvents = "auto";
+          span.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleWordAnnotation(idx);
+          });
+        } else {
+          span.style.pointerEvents = "none";
+        }
+        if (userWordAnnotationFlags[idx]) {
+          span.classList.add('highlight');
+        }
+        editorContentDiv.appendChild(span);
+      });
+    }
+    
+    function toggleWordAnnotation(index) {
+      if (!isEditorMode) return;
+      userWordAnnotationFlags[index] = !userWordAnnotationFlags[index];
+      renderUserTier();
+      updateWaveformWordOverlays();
+    }
+    
+    function updateWaveformWordOverlays() {
+      const overlaysContainer = document.getElementById('word-overlays');
+      overlaysContainer.innerHTML = "";
+      const intervals = currentJsonData.words.interval;
+      const totalDuration = intervals[intervals.length - 1][1];
+      const wWidth = wavesurfer.drawer.wrapper.clientWidth;
+      
+      userWordAnnotationFlags.forEach((flag, idx) => {
+        if (flag) {
+          const wordInterval = intervals[idx];
+          const leftPercent = (wordInterval[0] / totalDuration) * 100;
+          const widthPercent = ((wordInterval[1] - wordInterval[0]) / totalDuration) * 100;
+          const overlay = document.createElement('div');
+          overlay.classList.add('word-overlay');
+          overlay.style.left = leftPercent + '%';
+          overlay.style.width = widthPercent + '%';
+          overlaysContainer.appendChild(overlay);
+        }
+      });
+    }
+    
+    function createUserTier(words, intervals, totalDuration) {
+      initializeUserWordAnnotations();
+      renderUserTier();
+      updateWaveformWordOverlays();
+    }
+    
+    /***********************
+     * Display Results and Textgrid Result
+     ***********************/
+    function displayResults() {
+      const words = currentJsonData.words.sentence;
+      const groundIntervals = currentJsonData.words.interval;
+      const totalDuration = groundIntervals[groundIntervals.length - 1][1];
+      createUserTier(words, groundIntervals, totalDuration);
+      displayTextgridResult();
+    }
+    
+    // Instead of a table, display a JSON-like result containing:
+    // - word list,
+    // - intervals (from the JSON file),
+    // - disfluency label (binary list from user annotations)
+    function displayTextgridResult() {
+      const words = currentJsonData.words.sentence;
+      const intervals = currentJsonData.words.interval;
+      // Create binary list from userWordAnnotationFlags (1 if annotated, 0 otherwise)
+      const disfluencyLabels = userWordAnnotationFlags.map(flag => flag ? 1 : 0);
+      const resultData = {
+        words: words,
+        intervals: intervals,
+        disfluency_label: disfluencyLabels
+      };
+      const resultDiv = document.getElementById('textgrid-result');
+      resultDiv.innerHTML = "<h3>Textgrid Result</h3><pre>" + JSON.stringify(resultData, null, 2) + "</pre>";
+      resultDiv.style.display = "block";
+    }
+    
+    /***********************
+     * Confirm Button (Enables Next)
+     ***********************/
+    document.getElementById('confirm-button').addEventListener('click', () => {
+      document.getElementById('next-page').disabled = false;
+    });
+    
+    /***********************
+     * Navigation & Save
+     ***********************/
+    document.getElementById('prev-page').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadCurrentFile();
+      }
+    });
+    
+    document.getElementById('next-page').addEventListener('click', () => {
+      if (currentIndex < idList.length - 1) {
+        const fileId = idList[currentIndex];
+        resultsPerFile[fileId] = {
+          predicted_method: currentJsonData.predicted_method || "",
+          editorAnnotations: editorIntervals.concat(editorModeIntervals)
+        };
+        currentIndex++;
+        loadCurrentFile();
+      }
+    });
+    
+    document.getElementById('save-result').addEventListener('click', () => {
+      const progressData = {
+        raterName: raterName,
+        currentIndex: currentIndex,
+        resultsPerFile: resultsPerFile,
+        globalShowMethodLabels: globalShowMethodLabels,
+        globalShuffleMethods: globalShuffleMethods,
+        globalSelectedMethods: globalSelectedMethods
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+      alert("Progress saved!");
+    });
+    
+    document.getElementById('finish-button').addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Rater,FileID,Predicted_Method,User_Annotations\r\n";
+      for (let fileId in resultsPerFile) {
+        const res = resultsPerFile[fileId];
+        const userAnnStr = (res.editorAnnotations || [])
+          .map(ann => `[${ann.start.toFixed(2)}-${ann.end.toFixed(2)}]`)
+          .join(" | ");
+        csvContent += `${raterName},${fileId},${res.predicted_method},"${userAnnStr}"\r\n`;
+      }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${raterName}_results_4.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      localStorage.removeItem(STORAGE_KEY);
+    });
+    
+    /***********************
+     * Replay Button
+     ***********************/
+    document.getElementById('replay-button').addEventListener('click', () => {
+      document.getElementById('draw-overlay').innerHTML = "";
+      const wordOverlays = document.createElement('div');
+      wordOverlays.id = "word-overlays";
+      wordOverlays.style.position = "absolute";
+      wordOverlays.style.top = "0";
+      wordOverlays.style.left = "0";
+      wordOverlays.style.width = "100%";
+      wordOverlays.style.height = "100%";
+      wordOverlays.style.pointerEvents = "none";
+      document.getElementById('draw-overlay').appendChild(wordOverlays);
+      
+      editorIntervals = [];
+      editorModeIntervals = [];
+      document.getElementById('results').style.display = 'none';
+      wavesurfer.stop();
+      wavesurfer.play(0);
+    });
+    
+    // (Space bar for play/pause is enabled globally)
+  </script>
+</body>
+</html>

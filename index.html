@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disfluency Annotation Experiment</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .language-selector {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+    .language-selector label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .top-section {
+      margin-bottom: 30px;
+    }
+    .top-section h2 {
+      margin-bottom: 10px;
+      color: #007BFF;
+    }
+    .top-section input[type="text"],
+    .top-section select {
+      padding: 8px;
+      margin: 5px 0 15px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #eee;
+      margin: 20px 0;
+    }
+    .instruction-section {
+      display: none;
+    }
+    .instruction-section.active {
+      display: block;
+    }
+    .instruction-section h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .instruction-section h2.section-title {
+      color: #007BFF;
+      margin: 25px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #007BFF;
+    }
+    .instruction-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .instruction-section li {
+      margin-bottom: 15px;
+    }
+    .instruction-section code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    /* New Button Style for Experiment Groups */
+    .button-group a {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 10px;
+      background-color: #007BFF;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: background-color 0.3s;
+    }
+    .button-group a:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Language Selector -->
+    <div class="language-selector">
+      <label for="language-select">Select Language:</label>
+      <select id="language-select" onchange="changeLanguage()">
+        <option value="en" selected>English</option>
+        <option value="ja">日本語</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+
+    <!-- Top Section: Participant Info & Experiment Navigation -->
+    <div class="top-section">
+      <!-- Instruction Content Sections -->
+      <!-- English Version -->
+      <div id="instruction-en" class="instruction-section active">
+        <h1>Experiment Platform Overview</h1>
+        <p>This platform is designed specifically for Japanese learners whose second language is English, aimed at recording your comprehension of the audio content.</p>
+        
+        <h2 class="section-title">Experiment Procedure</h2>
+        <ul>
+          <li>
+            <strong>1. Start Playback</strong><br>
+            - Press the spacebar to start playing the audio.
+          </li>
+          <li>
+            <strong>2. Real-Time Annotation of Unclear Sections</strong><br>
+            - During playback, if you encounter any sections that you do not understand, hold down the <em>Annotation</em> button to mark them.<br>
+            - When you feel that you have understood that section, release the button to stop the annotation.<br>
+            - <em>Note:</em> Please pay full attention; it is recommended to listen to each audio clip only once.
+          </li>
+          <li>
+            <strong>3. Edit Annotation (if necessary)</strong><br>
+            - If you accidentally miss or misannotate any section during playback, click the blue <em>Editor</em> button to enter edit mode.<br>
+            - Drag over the waveform to highlight the section you missed, then click the <em>Confirm</em> button to add the new annotation.<br>
+            - <em>Note:</em> The editing process can only be done once.
+          </li>
+          <li>
+            <strong>4. Proceed to the Next Audio</strong><br>
+            - Once you have annotated the current audio, click the <em>Next</em> button to move on to the next segment.
+          </li>
+          <li>
+            <strong>5. Save Results</strong><br>
+            - After completing annotations for all audio clips, click “Save Results” to automatically download a <code>.csv</code> file.<br>
+            - Please send this file to: <a href="mailto:kevingenghaopeng@gavo.u-tokyo.ac.jp">kevingenghaopeng@gavo.u-tokyo.ac.jp</a>.
+          </li>
+        </ul>
+        <h2 class="section-title">Experiment Groups</h2>
+        <ul>
+          <li>This experiment consists of five experimental groups and one practice group.</li>
+          <li><strong>Strong Recommendation:</strong> Start with the practice group to familiarize yourself with the process.</li>
+        </ul>
+      </div>
+  
+      <!-- Japanese Version -->
+      <div id="instruction-ja" class="instruction-section">
+        <h1>実験プラットフォーム概要</h1>
+        <p>本プラットフォームは、第二言語として英語を学ぶ日本人向けに設計されており、音声内容の理解度を記録することを目的としています。</p>
+        
+        <h2 class="section-title">実験手順</h2>
+        <ul>
+          <li>
+            <strong>1. 再生開始</strong><br>
+            - スペースキーを押して音声の再生を開始してください。
+          </li>
+          <li>
+            <strong>2. 不明瞭な部分のリアルタイム注釈</strong><br>
+            - 再生中に理解できない部分があった場合は、<em>Click & hold the annotate</em>ボタンを押し続けて、その部分を記録してください。<br>
+            - その部分が理解できたと感じたら、ボタンを離して注釈を終了してください。<br>
+            - <em>注意：</em> 集中して取り組んでください。各音声は一度だけ聴くことを推奨します。
+          </li>
+          <li>
+            <strong>3. 注釈の編集（必要な場合）</strong><br>
+            - 再生中に誤って注釈を見逃したり、誤って記録した場合は、青色の<em>Editor</em>ボタンをクリックして編集モードに入ってください。<br>
+            - 波形上で該当部分をドラッグして選択し、<em>Confirm</em>ボタンをクリックして新しい注釈を追加してください。<br>
+            - <em>注意：</em> 編集は一度だけ行えます。
+          </li>
+          <li>
+            <strong>4. 次の音声へ進む</strong><br>
+            - 現在の音声の注釈が完了したら、<em>Next</em>ボタンをクリックして次のセグメントに移動してください。
+          </li>
+          <li>
+            <strong>5. 結果の保存</strong><br>
+            - すべての音声の注釈が完了したら、「結果の保存」ボタンをクリックして、<code>.csv</code>ファイルを自動的にダウンロードしてください。<br>
+            - このファイルを以下のメールアドレスに送信してください：<a href="mailto:kevingenghaopeng@gavo.u-tokyo.ac.jp">kevingenghaopeng@gavo.u-tokyo.ac.jp</a>.
+          </li>
+        </ul>
+        <h2 class="section-title">実験グループ</h2>
+        <ul>
+          <li>本実験は5つの実験グループと1つの練習グループで構成されています。</li>
+          <li><strong>強く推奨：</strong> まずは練習グループで操作に慣れてください。</li>
+        </ul>
+      </div>
+  
+      <!-- Chinese Version -->
+      <div id="instruction-zh" class="instruction-section">
+        <h1>实验平台概述</h1>
+        <p>本平台专为以英语为第二语言的日本学习者设计，旨在记录您对音频内容的理解情况。</p>
+        
+        <h2 class="section-title">实验流程</h2>
+        <ul>
+          <li>
+            <strong>1. 开始播放</strong><br>
+            - 按空格键开始播放音频。
+          </li>
+          <li>
+            <strong>2. 实时标注不清楚的部分</strong><br>
+            - 在播放过程中，如果遇到不理解的部分，请按住<em>Click & hold the annotate</em>按钮进行标注。<br>
+            - 当您觉得理解了该部分后，请松开按钮以停止标注。<br>
+            - <em>注意：</em> 请全神贯注，建议每段音频仅听一次。
+          </li>
+          <li>
+            <strong>3. 编辑标注（如有需要）</strong><br>
+            - 如果在播放过程中不小心遗漏或错误标注了某部分，请点击蓝色的<em>Editor</em>按钮进入编辑模式。<br>
+            - 在波形上拖动以选中遗漏的部分，然后点击<em>Confirm</em>按钮添加新标注。<br>
+            - <em>注意：</em> 编辑过程只能执行一次。
+          </li>
+          <li>
+            <strong>4. 进入下一个音频</strong><br>
+            - 完成当前音频的标注后，点击<em>Next</em>按钮进入下一个音频。
+          </li>
+          <li>
+            <strong>5. 保存结果</strong><br>
+            - 完成所有音频的标注后，点击“保存结果”按钮将自动下载一个<code>.csv</code>文件。<br>
+            - 请将该文件发送至：<a href="mailto:kevingenghaopeng@gavo.u-tokyo.ac.jp">kevingenghaopeng@gavo.u-tokyo.ac.jp</a>.
+          </li>
+        </ul>
+        <h2 class="section-title">实验组</h2>
+        <ul>
+          <li>本实验包括五个实验组和一个练习组。</li>
+          <li><strong>强烈建议：</strong> 请先尝试练习组以熟悉操作流程。</li>
+        </ul>
+      </div>
+      <hr>
+      <!-- <p>
+        <strong>Participant Name:</strong><br>
+        <input type="text" placeholder="Enter your name">
+      </p>
+      <p>
+        <strong>I'm a:</strong><br>
+        <select>
+          <option value="native">Native English Speaker</option>
+          <option value="non-native-jp">Non-Native English Speaker (Japanese)</option>
+          <option value="non-native">Non-Native Speaker (not Japanese)</option>
+        </select>
+      </p> -->
+      <hr>
+      <h3>Start Experiment</h3>
+      <div class="button-group">
+        <a href="editing_test.html">Test Group<br></a>
+        <a href="group1.html">Group 1<br></a>
+        <a href="group2.html">Group 2<br></a>
+        <a href="group3.html">Group 3<br></a>
+      </div>
+      <hr>
+    </div>
+
+  </div>
+
+  <script>
+    function changeLanguage() {
+      var lang = document.getElementById("language-select").value;
+      var sections = document.getElementsByClassName("instruction-section");
+      for (var i = 0; i < sections.length; i++) {
+        sections[i].classList.remove("active");
+      }
+      document.getElementById("instruction-" + lang).classList.add("active");
+    }
+  </script>
+</body>
+</html>

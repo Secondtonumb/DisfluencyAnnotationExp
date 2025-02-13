@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disfluency Rating Experiment (Fixed)</title>
+  <style>
+    /* ----------------------- Global Styles ----------------------- */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    /* ----------------------- Start Page -------------------------- */
+    #start-page {
+      text-align: center;
+      padding: 50px;
+    }
+    #start-page input {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      margin: 10px 0;
+    }
+    #start-page button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    /* ----------------------- Experiment Page --------------------- */
+    #experiment-page {
+      display: none;
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+    #file-id {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    /* ----------------------- Waveform ---------------------------- */
+    #waveform {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #f2f2f2;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    #cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+    }
+    /* ----------------------- Annotation Tiers -------------------- */
+    #tiers-container {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .annotation-tier {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+    }
+    .annotation-tier h3 {
+      margin: 0;
+      padding: 5px;
+      background: #eee;
+      font-size: 16px;
+    }
+    .tier-content {
+      position: relative;
+      height: calc(100% - 60px); /* leaves space for header and rating */
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .annotation-interval {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 60px;
+      box-sizing: border-box;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.01s, border 0.01s;
+    }
+    .annotation-interval.active {
+      border: 1px solid #333;
+      background-color: #c8e6c9 !important;
+    }
+    /* ----------------------- Rating Controls --------------------- */
+    .rater {
+      text-align: right;
+      padding: 5px;
+      background: #fafafa;
+      border-top: 1px solid #ddd;
+    }
+    .rater span {
+      font-size: 24px;
+      margin: 0 3px;
+      cursor: pointer;
+      user-select: none;
+      color: #aaa;
+    }
+    .rater span.selected {
+      color: gold;
+    }
+    /* ----------------------- Pagination & Finish ----------------- */
+    #pagination-controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #pagination-controls button {
+      padding: 8px 12px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    #finish-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- ----------------------- Start Page ----------------------- -->
+  <div id="start-page">
+    <h1>Disfluency Rating Experiment</h1>
+    <p>Please enter your name to begin:</p>
+    <input type="text" id="rater-name" placeholder="Your Name">
+    <br>
+    <button id="start-experiment">Start Experiment</button>
+  </div>
+  
+  <!-- ----------------------- Experiment Page ----------------------- -->
+  <div id="experiment-page">
+    <div id="file-id"></div>
+    <div id="waveform">
+      <div id="cursor"></div>
+    </div>
+    <div id="tiers-container"></div>
+    <div id="pagination-controls">
+      <button id="prev-page">Previous</button>
+      <span id="page-info"></span>
+      <button id="next-page" disabled>Next</button>
+    </div>
+    <button id="finish-button" disabled>Finish and Download CSV</button>
+  </div>
+  
+  <!-- ----------------------- WaveSurfer Library ----------------------- -->
+  <script src="https://unpkg.com/wavesurfer.js@5.2.0/dist/wavesurfer.min.js"></script>
+  <script>
+    /***********************
+     * CONFIGURATION       *
+     ***********************/
+    const audioDir = "./wav/V000_R_max_valid/";
+    const jsonDir = "./json/disfluency_word_level_res/";
+    const idList = [
+      "0668-0007",
+      "0668-0006",
+      "0745-0003"
+    ];
+    
+    /***********************
+     * GLOBAL VARIABLES    *
+     ***********************/
+    let currentIndex = 0;
+    let currentJsonData = null;
+    let allRatings = {};  // Structure: { fileId: { method: rating } }
+    let raterName = "";
+    
+    /***********************
+     * WAVEFORM SETUP      *
+     ***********************/
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#a0a0a0',
+      height: 200,
+      backend: 'WebAudio',
+      responsive: true
+    });
+    const cursor = document.getElementById('cursor');
+    
+    // Update the cursor and synchronize textgrid highlighting.
+    wavesurfer.on('audioprocess', (currentTime) => {
+      const duration = wavesurfer.getDuration();
+      const waveformWidth = document.getElementById('waveform').clientWidth;
+      cursor.style.left = ((currentTime / duration) * waveformWidth) + 'px';
+      
+      // Update active annotation segments in all tiers.
+      document.querySelectorAll('.annotation-interval').forEach(interval => {
+        const start = parseFloat(interval.getAttribute('data-start'));
+        const end = parseFloat(interval.getAttribute('data-end'));
+        if (currentTime >= start && currentTime <= end) {
+          interval.classList.add('active');
+        } else {
+          interval.classList.remove('active');
+        }
+      });
+    });
+    
+    // Play/pause on waveform click.
+    document.getElementById('waveform').addEventListener('click', () => {
+      wavesurfer.playPause();
+    });
+    
+    /***************************
+     * START PAGE INTERACTION  *
+     ***************************/
+    document.getElementById('start-experiment').addEventListener('click', () => {
+      const nameInput = document.getElementById('rater-name').value.trim();
+      if (!nameInput) {
+        alert("Please enter your name.");
+        return;
+      }
+      raterName = nameInput;
+      document.getElementById('start-page').style.display = 'none';
+      document.getElementById('experiment-page').style.display = 'block';
+      loadCurrentFile();
+    });
+    
+    /***************************
+     * LOAD CURRENT FILE       *
+     ***************************/
+    function loadCurrentFile() {
+      const fileId = idList[currentIndex];
+      document.getElementById('file-id').textContent = "File ID: " + fileId;
+      document.getElementById('page-info').textContent = "File " + (currentIndex + 1) + " of " + idList.length;
+      
+      // Clear previous tiers.
+      document.getElementById('tiers-container').innerHTML = "";
+      
+      // Load JSON.
+      fetch(jsonDir + fileId + ".json")
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Error loading JSON for " + fileId);
+          }
+          return response.json();
+        })
+        .then(jsonData => {
+          currentJsonData = jsonData;
+          populateTiers(jsonData);
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Failed to load JSON for file: " + fileId);
+        });
+      
+      // Load audio.
+      wavesurfer.load(audioDir + fileId + ".wav");
+      
+      // Pagination button setup.
+      document.getElementById('prev-page').disabled = (currentIndex === 0);
+      document.getElementById('next-page').disabled = true; // until ratings complete
+    }
+    
+    /***************************
+     * POPULATE ANNOTATION TIERS *
+     ***************************/
+    function populateTiers(jsonData) {
+      const tiersContainer = document.getElementById('tiers-container');
+      
+      // Extract common data.
+      const words = jsonData.words.sentence;
+      const intervals = jsonData.words.interval;
+      const totalDuration = intervals[intervals.length - 1][1];
+      
+      // Methods: "ground" (top-level) and any extra methods.
+      const methods = ["ground"].concat(Object.keys(jsonData.words).filter(key => {
+        return key !== "sentence" && key !== "interval" && key !== "disfluency_label";
+      }));
+      
+      methods.forEach(method => {
+        // Create tier container.
+        const tierDiv = document.createElement('div');
+        tierDiv.classList.add('annotation-tier');
+        
+        // Tier header.
+        const header = document.createElement('h3');
+        header.textContent = (method === "ground") ? "Ground Truth" : method;
+        tierDiv.appendChild(header);
+        
+        // Tier content (textgrid).
+        const tierContent = document.createElement('div');
+        tierContent.classList.add('tier-content');
+        
+        // Choose disfluency labels.
+        let labels = [];
+        if (method === "ground") {
+          labels = jsonData.words.disfluency_label;
+        } else if (jsonData.words[method] && jsonData.words[method].disfluency_label) {
+          labels = jsonData.words[method].disfluency_label;
+        } else {
+          labels = jsonData.words.disfluency_label;
+        }
+        
+        // Create one annotation interval per word.
+        words.forEach((word, index) => {
+          const interval = intervals[index];
+          const start = interval[0];
+          const end = interval[1];
+          const leftPercent = (start / totalDuration) * 100;
+          const widthPercent = ((end - start) / totalDuration) * 100;
+          
+          const wordDiv = document.createElement('div');
+          wordDiv.classList.add('annotation-interval');
+          wordDiv.textContent = word;
+          wordDiv.style.left = leftPercent + '%';
+          wordDiv.style.width = widthPercent + '%';
+          // Save start/end times for sync highlighting.
+          wordDiv.setAttribute('data-start', start);
+          wordDiv.setAttribute('data-end', end);
+          
+          // Style based on disfluency.
+          const label = labels[index];
+          if (label === 1) {
+            wordDiv.style.backgroundColor = "#FFF3E0";
+            wordDiv.style.color = "#BF360C";
+            wordDiv.style.fontWeight = "bold";
+          } else {
+            wordDiv.style.backgroundColor = "#ECEFF1";
+            wordDiv.style.color = "#37474F";
+          }
+          
+          // Clicking a word plays that segment.
+          wordDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
+            wavesurfer.play(start, end);
+          });
+          tierContent.appendChild(wordDiv);
+        });
+        tierDiv.appendChild(tierContent);
+        
+        // Create rating control for this tier.
+        const ratingDiv = document.createElement('div');
+        ratingDiv.classList.add('rater');
+        ratingDiv.setAttribute('data-method', method);
+        // Add 5 stars.
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('span');
+          star.setAttribute('data-value', i);
+          star.innerHTML = '&#9734;'; // hollow star
+          ratingDiv.appendChild(star);
+        }
+        tierDiv.appendChild(ratingDiv);
+        
+        tiersContainer.appendChild(tierDiv);
+      });
+      
+      // Attach rating listeners.
+      initRatingListeners();
+    }
+    
+    /***************************
+     * RATING LISTENERS        *
+     ***************************/
+    function initRatingListeners() {
+      const raters = document.querySelectorAll('.rater span');
+      raters.forEach(star => {
+        star.addEventListener('click', function() {
+          const rating = parseInt(this.getAttribute('data-value'));
+          const raterDiv = this.parentElement;
+          const method = raterDiv.getAttribute('data-method');
+          
+          // Update star display.
+          Array.from(raterDiv.children).forEach(s => {
+            const val = parseInt(s.getAttribute('data-value'));
+            if (val <= rating) {
+              s.classList.add('selected');
+              s.innerHTML = '&#9733;'; // filled star
+            } else {
+              s.classList.remove('selected');
+              s.innerHTML = '&#9734;'; // hollow star
+            }
+          });
+          
+          // Save rating.
+          const fileId = idList[currentIndex];
+          if (!allRatings[fileId]) {
+            allRatings[fileId] = {};
+          }
+          allRatings[fileId][method] = rating;
+          
+          // Enable next button if all ratings are in.
+          checkRatingsComplete();
+        });
+      });
+    }
+    
+    function checkRatingsComplete() {
+      const fileId = idList[currentIndex];
+      const raters = document.querySelectorAll('.rater');
+      let complete = true;
+      raters.forEach(rater => {
+        const method = rater.getAttribute('data-method');
+        if (!allRatings[fileId] || allRatings[fileId][method] == null) {
+          complete = false;
+        }
+      });
+      document.getElementById('next-page').disabled = !complete;
+      checkAllRatingsComplete();
+    }
+    
+    function checkAllRatingsComplete() {
+      let allComplete = true;
+      idList.forEach(fileId => {
+        if (!allRatings[fileId]) {
+          allComplete = false;
+        }
+      });
+      document.getElementById('finish-button').disabled = !allComplete;
+    }
+    
+    /***************************
+     * PAGINATION CONTROLS     *
+     ***************************/
+    document.getElementById('prev-page').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadCurrentFile();
+      }
+    });
+    
+    document.getElementById('next-page').addEventListener('click', () => {
+      if (currentIndex < idList.length - 1) {
+        currentIndex++;
+        loadCurrentFile();
+      }
+    });
+    
+    /***************************
+     * FINISH & DOWNLOAD CSV   *
+     ***************************/
+    document.getElementById('finish-button').addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Rater,FileID,Method,Rating\r\n";
+      for (let fileId in allRatings) {
+        for (let method in allRatings[fileId]) {
+          const rating = allRatings[fileId][method];
+          csvContent += `${raterName},${fileId},${method},${rating}\r\n`;
+        }
+      }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${raterName}_ratings.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>

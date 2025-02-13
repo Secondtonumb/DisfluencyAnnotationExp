@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio & JSON Disfluency Viewer – Word Tier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    /* Dropdown styling */
+    #labelSource {
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Waveform container with relative positioning for the playhead and highlights */
+    #waveform {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    /* Container for waveform highlights (overlays) */
+    #waveform-highlights {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      pointer-events: none;
+      /* Adjust z-index as needed so that highlights appear above the waveform but below the cursor */
+      z-index: 2;
+    }
+    /* The moving playhead (red cursor) */
+    #cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+      z-index: 3;
+    }
+    /* Container for the annotation tier */
+    #annotations {
+      width: 100%;
+    }
+    .annotation-tier {
+      position: relative;
+      height: 30px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      background: white; /* Initially white */
+    }
+    .annotation-tier h3 {
+      margin: 0;
+      padding: 0 5px;
+      font-size: 14px;
+      background: #eee;
+      line-height: 30px;
+    }
+    /* Each word interval is absolutely positioned within the tier */
+    .annotation-interval {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 30px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      /* Initially, we'll override this in JS: */
+      background-color: white;
+    }
+    /* Style for the waveform highlight overlay intervals */
+    .waveform-highlight-interval {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      /* Initially transparent until “locked in” */
+      background-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio & JSON Disfluency Viewer – Word Tier</h1>
+  
+  <!-- Dropdown to choose which disfluency label to use -->
+  <label for="labelSource" style="display:block; text-align:center;">Select Label Source:</label>
+  <select id="labelSource" style="display:block; margin:0 auto 20px auto;">
+    <option value="ground">Ground Truth</option>
+    <option value="att_based_D_on_src">att_based_D_on_src</option>
+    <option value="hs_based_D_on_src_novc">hs_based_D_on_src_novc</option>
+    <option value="zs_based_D_on_src_novc">zs_based_D_on_src_novc</option>
+    <option value="hs_based_D_on_src">hs_based_D_on_src</option>
+    <option value="zs_based_D_on_src">zs_based_D_on_src</option>
+    <option value="zs_hs_based_D_on_src">zs_hs_based_D_on_src</option>
+    <option value="ASR">ASR</option>
+  </select>
+  
+  <!-- Waveform container with a red cursor and a container for highlight overlays -->
+  <div id="waveform">
+    <div id="waveform-highlights"></div>
+    <div id="cursor"></div>
+  </div>
+  
+  <!-- Annotation tier: only the Word tier is shown -->
+  <div id="annotations">
+    <div id="word-tier" class="annotation-tier">
+      <h3>Word Tier</h3>
+    </div>
+  </div>
+  
+  <!-- Include WaveSurfer v5.2.0 -->
+  <script src="https://unpkg.com/wavesurfer.js@5.2.0/dist/wavesurfer.min.js"></script>
+  <script>
+    /**********************************************
+     * Embedded JSON Data (for demonstration)     *
+     **********************************************/
+    // read json data from the file
+    const jsonData = {
+      "uttid": "0668-0004",
+      "words": {
+        "sentence": [
+          "THE",
+          "CHILDREN",
+          "WHO",
+          "ARE",
+          "SAME",
+          "GENERATIONS",
+          "ARE",
+          "SUFFERING",
+          "FROM",
+          "HUNGER"
+        ],
+        "interval": [
+          [0.01, 0.14],
+          [0.14, 0.71],
+          [0.71, 0.86],
+          [0.86, 0.88],
+          [0.88, 0.91],
+          [0.91, 2.5],
+          [2.5, 2.6],
+          [2.6, 3.32],
+          [3.32, 3.63],
+          [3.63, 4.06]
+        ],
+        "disfluency_label": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        "att_based_D_on_src": {
+          "disfluency_label": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0
+          ]
+        },
+        "hs_based_D_on_src_novc": {
+          "disfluency_label": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "zs_based_D_on_src_novc": {
+          "disfluency_label": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "hs_based_D_on_src": {
+          "disfluency_label": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "zs_based_D_on_src": {
+          "disfluency_label": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "zs_hs_based_D_on_src": {
+          "disfluency_label": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "ASR": {
+          "disfluency_label": [
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    };
+    
+    /******************************************
+     * Global Configuration and Utilities   *
+     ******************************************/
+    
+    // Use the ground-truth intervals and words.
+    const wordIntervals = jsonData.words.interval;
+    const sentenceWords = jsonData.words.sentence;
+    const totalDuration = wordIntervals.reduce((max, interval) => Math.max(max, interval[1]), 0);
+    
+    // Utility: Given a method name, return its disfluency labels.
+    function getDisfluencyLabels(method) {
+      if(method === "ground") {
+        return jsonData.words.disfluency_label;
+      } else if (jsonData.words.hasOwnProperty(method)) {
+        return jsonData.words[method].disfluency_label;
+      } else {
+        return jsonData.words.disfluency_label;
+      }
+    }
+    
+    /***********************
+     * WaveSurfer Setup   *
+     ***********************/
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#a0a0a0',
+      height: 200,
+      backend: 'WebAudio'
+    });
+    
+    wavesurfer.on('error', (e) => console.error('WaveSurfer error:', e));
+    wavesurfer.load("./wav/V000_R_max_valid/0668-0004.wav");
+    
+    /**************************************************
+     * Populate the Word Tier and Waveform Overlays   *
+     **************************************************/
+    function populateWordTier() {
+      const container = document.getElementById('word-tier');
+      // Remove any existing word intervals.
+      container.querySelectorAll('.annotation-interval').forEach(el => el.remove());
+      
+      // Get selected label source.
+      const labelSource = document.getElementById('labelSource').value;
+      const labels = getDisfluencyLabels(labelSource);
+      
+      sentenceWords.forEach((word, index) => {
+        const interval = wordIntervals[index];
+        const label = labels[index];
+        const div = document.createElement('div');
+        div.classList.add('annotation-interval');
+        div.textContent = word;
+        // Save label, index, and played flag.
+        div.dataset.label = label;
+        div.dataset.played = "false";
+        div.dataset.index = index;  // Link to corresponding waveform overlay.
+        
+        const start = interval[0];
+        const end = interval[1];
+        const leftPercent = (start / totalDuration) * 100;
+        const widthPercent = ((end - start) / totalDuration) * 100;
+        div.style.left = leftPercent + '%';
+        div.style.width = widthPercent + '%';
+        
+        // Initial "normal" styling.
+        div.style.backgroundColor = "#ECEFF1";
+        div.style.color = "#37474F";
+        
+        // Clicking plays the segment.
+        div.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wavesurfer.play(start, end);
+        });
+        
+        container.appendChild(div);
+      });
+      
+      // Save for later use.
+      wavesurfer.totalDurationForAnnotations = totalDuration;
+    }
+    
+    function populateWaveformHighlights() {
+      const container = document.getElementById('waveform-highlights');
+      // Clear any existing overlays.
+      container.innerHTML = '';
+      
+      sentenceWords.forEach((word, index) => {
+        const interval = wordIntervals[index];
+        const start = interval[0];
+        const end = interval[1];
+        const leftPercent = (start / totalDuration) * 100;
+        const widthPercent = ((end - start) / totalDuration) * 100;
+        const highlightDiv = document.createElement('div');
+        highlightDiv.classList.add('waveform-highlight-interval');
+        highlightDiv.dataset.index = index;
+        highlightDiv.dataset.played = "false";
+        highlightDiv.style.left = leftPercent + '%';
+        highlightDiv.style.width = widthPercent + '%';
+        // Initially transparent.
+        highlightDiv.style.backgroundColor = "transparent";
+        
+        container.appendChild(highlightDiv);
+      });
+    }
+    
+    // When audio is ready, populate both tiers.
+    wavesurfer.on('ready', () => {
+      populateWordTier();
+      populateWaveformHighlights();
+    });
+    
+    // Re-populate on dropdown change.
+    document.getElementById('labelSource').addEventListener('change', () => {
+      populateWordTier();
+      populateWaveformHighlights();
+    });
+    
+    /*************************************************
+     * Update the Playhead and "Lock in" Colors       *
+     *************************************************/
+    wavesurfer.on('audioprocess', (currentTime) => {
+      const waveformElem = document.getElementById('waveform');
+      const cursor = document.getElementById('cursor');
+      cursor.style.left = ((currentTime / wavesurfer.getDuration()) * waveformElem.clientWidth) + 'px';
+      
+      const totalDur = wavesurfer.totalDurationForAnnotations || wavesurfer.getDuration();
+      
+      // Update each word interval if playhead is within its span.
+      document.querySelectorAll('#word-tier .annotation-interval').forEach(div => {
+        if (div.dataset.played === "true") return;
+        
+        const leftPercent = parseFloat(div.style.left);
+        const widthPercent = parseFloat(div.style.width);
+        const annotationStart = (leftPercent / 100) * totalDur;
+        const annotationEnd = ((leftPercent + widthPercent) / 100) * totalDur;
+        
+        if (currentTime >= annotationStart && currentTime < annotationEnd) {
+          const label = parseInt(div.dataset.label, 10);
+          const index = div.dataset.index;
+          // Select the corresponding waveform highlight.
+          const waveformHighlight = document.querySelector(
+            '#waveform-highlights .waveform-highlight-interval[data-index="'+ index +'"]'
+          );
+          
+          if (label === 1) { // Disfluent word.
+            div.style.backgroundColor = "#FFF3E0";
+            div.style.color = "#BF360C";
+            div.style.fontWeight = "bold";
+            if (waveformHighlight && waveformHighlight.dataset.played !== "true") {
+              waveformHighlight.style.backgroundColor = "#FFF3E0";
+              waveformHighlight.dataset.played = "true";
+            }
+          } else { // Fluent word.
+            div.style.backgroundColor = "#ECEFF1";
+            div.style.color = "#37474F";
+            if (waveformHighlight && waveformHighlight.dataset.played !== "true") {
+              waveformHighlight.style.backgroundColor = "#ECEFF1";
+              waveformHighlight.dataset.played = "true";
+            }
+          }
+          div.dataset.played = "true";
+        }
+      });
+    });
+    
+    /************************************
+     * Play/Pause on Waveform Click     *
+     ************************************/
+    document.getElementById('waveform').addEventListener('click', () => {
+      wavesurfer.playPause();
+    });
+  </script>
+</body>
+</html>

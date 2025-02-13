@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio & TextGrid Annotation Player</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    /* Waveform container (relative to allow absolute positioning of the cursor) */
+    #waveform {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    /* The moving cursor (playhead) */
+    #cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+    }
+    /* Container for the horizontal annotation tiers */
+    #annotations {
+      width: 100%;
+    }
+    .annotation-tier {
+      position: relative;
+      height: 30px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+    }
+    .annotation-tier h3 {
+      margin: 0;
+      padding: 0 5px;
+      font-size: 14px;
+      background: #eee;
+      line-height: 30px;
+    }
+    /* Each annotation is absolutely positioned relative to its tier container */
+    .annotation-interval {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 30px;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    /* When an annotation is active (the cursor is within its boundaries) */
+    .annotation-interval.active {
+      background-color: rgba(0, 123, 255, 0.2);
+      border-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio & TextGrid Annotation Player</h1>
+  
+  <!-- Waveform container with a red cursor -->
+  <div id="waveform">
+    <div id="cursor"></div>
+  </div>
+  
+  <!-- Horizontal annotation tiers -->
+  <div id="annotations">
+    <div id="word-tier" class="annotation-tier">
+      
+    </div>
+    <div id="phoneme-tier" class="annotation-tier">
+      
+    </div>
+  </div>
+
+  <!-- Include WaveSurfer v5.2.0 -->
+  <script src="https://unpkg.com/wavesurfer.js@5.2.0/dist/wavesurfer.min.js"></script>
+  
+  <script>
+    // === Annotation Data (from your TextGrid template) ===
+    const annotations = {
+      word: [
+        { xmin: 0.0,   xmax: 0.23,  text: "WHAT" },
+        { xmin: 0.23,  xmax: 0.43,  text: "DOES" },
+        { xmin: 0.43,  xmax: 0.81,  text: "COLLEGE" },
+        { xmin: 0.81,  xmax: 1.09,  text: "LIFE" },
+        { xmin: 1.09,  xmax: 1.43,  text: "MEANS" },
+        { xmin: 1.43,  xmax: 1.64,  text: "TO" },
+        { xmin: 1.64,  xmax: 1.75,  text: "ME" }
+      ],
+      phoneme: [
+        { xmin: 0.0,   xmax: 0.08,  text: "W_B" },
+        { xmin: 0.08,  xmax: 0.16,  text: "AH1_I" },
+        { xmin: 0.16,  xmax: 0.23,  text: "T_E" },
+        { xmin: 0.23,  xmax: 0.27,  text: "D_B" },
+        { xmin: 0.27,  xmax: 0.36,  text: "IH0_I" },
+        { xmin: 0.36,  xmax: 0.43,  text: "Z_E" },
+        { xmin: 0.43,  xmax: 0.57,  text: "K_B" },
+        { xmin: 0.57,  xmax: 0.63,  text: "AA1_I" },
+        { xmin: 0.63,  xmax: 0.66,  text: "L_I" },
+        { xmin: 0.66,  xmax: 0.73,  text: "IH0_I" },
+        { xmin: 0.73,  xmax: 0.81,  text: "JH_E" },
+        { xmin: 0.81,  xmax: 0.90,  text: "L_B" },
+        { xmin: 0.90,  xmax: 0.98,  text: "AY1_I" },
+        { xmin: 0.98,  xmax: 1.09,  text: "F_E" },
+        { xmin: 1.09,  xmax: 1.22,  text: "M_B" },
+        { xmin: 1.22,  xmax: 1.30,  text: "IY1_I" },
+        { xmin: 1.30,  xmax: 1.38,  text: "N_I" },
+        { xmin: 1.38,  xmax: 1.43,  text: "Z_E" },
+        { xmin: 1.43,  xmax: 1.46,  text: "T_B" },
+        { xmin: 1.46,  xmax: 1.64,  text: "UW1_E" },
+        { xmin: 1.64,  xmax: 1.72,  text: "M_B" },
+        { xmin: 1.72,  xmax: 1.75,  text: "IY1_E" }
+      ]
+    };
+
+    // === Initialize WaveSurfer (using the default WebAudio backend) ===
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#a0a0a0',
+      height: 200,
+      backend: 'WebAudio'
+    });
+
+    // Log errors (if any)
+    wavesurfer.on('error', (e) => {
+      console.error('WaveSurfer error:', e);
+    });
+
+    // Load your audio file (ensure the path is correct and use a web server)
+    wavesurfer.load("./wav/V000_R_max_valid/0002-0000.wav");
+
+    // Once the audio is ready, set up the horizontal annotation tiers
+    wavesurfer.on('ready', () => {
+      const duration = wavesurfer.getDuration();
+
+      // Helper function to create an annotation element in the given tier container.
+      function createAnnotationElement(annotation, tierContainer) {
+        const div = document.createElement('div');
+        div.classList.add('annotation-interval');
+        div.textContent = annotation.text;
+        // Calculate position and width in percentages
+        const leftPercent = (annotation.xmin / duration) * 100;
+        const widthPercent = ((annotation.xmax - annotation.xmin) / duration) * 100;
+        div.style.left = leftPercent + '%';
+        div.style.width = widthPercent + '%';
+        // (Optional) Clicking an annotation jumps to its segment.
+        div.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wavesurfer.play(annotation.xmin, annotation.xmax);
+        });
+        tierContainer.appendChild(div);
+      }
+
+      const wordTierContainer = document.getElementById('word-tier');
+      annotations.word.forEach(annotation => {
+        createAnnotationElement(annotation, wordTierContainer);
+      });
+
+      const phonemeTierContainer = document.getElementById('phoneme-tier');
+      annotations.phoneme.forEach(annotation => {
+        createAnnotationElement(annotation, phonemeTierContainer);
+      });
+    });
+
+    // Update the cursor (playhead) position and highlight annotations as audio plays.
+    wavesurfer.on('audioprocess', (currentTime) => {
+      const duration = wavesurfer.getDuration();
+      const waveformElem = document.getElementById('waveform');
+      const waveformWidth = waveformElem.clientWidth;
+      const cursor = document.getElementById('cursor');
+      // Update cursor position (in pixels)
+      const left = (currentTime / duration) * waveformWidth;
+      cursor.style.left = left + 'px';
+
+      // For each annotation in the word and phoneme tiers, add or remove an "active" class.
+      ['word-tier', 'phoneme-tier'].forEach(tierId => {
+        document.querySelectorAll(`#${tierId} .annotation-interval`).forEach(div => {
+          // Get the annotation's start and end time by converting its CSS percentages back to time.
+          const leftPercent = parseFloat(div.style.left);
+          const widthPercent = parseFloat(div.style.width);
+          const annotationStart = (leftPercent / 100) * duration;
+          const annotationEnd = ((leftPercent + widthPercent) / 100) * duration;
+          if (currentTime >= annotationStart && currentTime < annotationEnd) {
+            div.classList.add('active');
+          } else {
+            div.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // Toggle play/pause when clicking the waveform.
+    document.getElementById('waveform').addEventListener('click', () => {
+      wavesurfer.playPause();
+    });
+  </script>
+</body>
+</html>

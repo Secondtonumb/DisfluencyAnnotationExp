@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio/Picture Tuples Experiment</title>
+  <!-- Include WaveSurfer.js from a CDN -->
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+  <!-- Assume load_audio_image_tuple.js defines loadTuples() -->
+  <script src="load_audio_image_tuple.js"></script>
+  <style>
+    /* ===== Global Styles ===== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      background: #f5f5f5;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Center vertically as well if desired */
+      /* justify-content: center; */
+    }
+    
+    /* ===== Start (Introduction) Page ===== */
+    #start-page {
+      text-align: center;
+      margin-top: 100px;
+    }
+    #start-page input {
+      padding: 8px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: 250px;
+    }
+    #start-page button {
+      padding: 8px 12px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    
+    /* ===== Experiment Page ===== */
+    #experiment-page {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    /* --- Waveform Styles --- */
+    #waveform {
+      position: relative;
+      width: 1000px;
+      height: 100px;
+      margin: 20px auto;
+      border: 10px solid #ccc;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+    #wave-pointer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    /* --- Image Container Styles --- */
+    .audio-image-pair {
+      margin: 20px auto;
+      width: 1000px;
+      position: relative;
+    }
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      border: 10px solid #ccc;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .image-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .image-track img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;  /* Force the image to exactly fill the container */
+    }
+    .mask {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      background: white;
+      pointer-events: none;
+    }
+    .image-pointer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: red;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    /* --- Rating Control Styles (Inside the Container) --- */
+    .rater {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 3px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    .rater span {
+      font-size: 20px;
+      margin: 0 2px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .rater span.selected {
+      color: gold;
+    }
+    
+    /* --- Pagination Controls --- */
+    #pagination-controls {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #pagination-controls button {
+      padding: 5px 10px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    #page-info {
+      font-size: 18px;
+    }
+    
+    /* --- Finish Button --- */
+    #finish-button {
+      margin-top: 20px;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- ============ Start Page ============ -->
+  <div id="start-page">
+    <h1>Welcome to the Experiment</h1>
+    <p>Please enter your name to begin:</p>
+    <input type="text" id="rater-name" placeholder="Your Name">
+    <br>
+    <button id="start-experiment">Start Experiment</button>
+  </div>
+  
+  <!-- ============ Experiment Page ============ -->
+  <div id="experiment-page">
+    <!-- Waveform Container -->
+    <div id="waveform">
+      <div id="wave-pointer"></div>
+    </div>
+    <!-- Container for Audio/Image Tuples -->
+    <div id="audio-image-pairs"></div>
+    <!-- Pagination Controls -->
+    <div id="pagination-controls">
+      <button id="prev-page">Previous</button>
+      <span id="page-info"></span>
+      <button id="next-page" disabled>Next</button>
+    </div>
+    <!-- Finish Button -->
+    <button id="finish-button" disabled>Finish and Download CSV</button>
+  </div>
+  
+  <script>
+    /***********************
+     * Start Page Handling *
+     ***********************/
+    let raterName = "";
+    document.getElementById("start-experiment").addEventListener("click", function() {
+      const nameInput = document.getElementById("rater-name").value.trim();
+      if (nameInput === "") {
+        alert("Please enter your name to start the experiment.");
+        return;
+      }
+      raterName = nameInput;
+      // Hide the start page and display the experiment page.
+      document.getElementById("start-page").style.display = "none";
+      document.getElementById("experiment-page").style.display = "block";
+    });
+    
+    /********************
+     * Global Data Setup *
+     ********************/
+    // Define directories and a list of audio IDs (without extensions).
+    const audioDirectory = './wav/V000_R_max_valid/';
+    const imageDirectories = ['./fig/zs_hs_out/', './fig/hs_out/', "fig/wave_with_interval_word_no_text/", "fig/att_out/"];  
+    const idList = [
+      "0668-0007",
+      "0668-0006",
+      "0745-0003"
+    ];
+    // Build tuples using the loadTuples function (assumed to be defined in load_audio_image_tuple.js)
+    // Each tuple is an object: { audio: audioDirectory+id+".wav", images: [ { image: imageDirectory+id+".png" }, ... ] }
+    const tuples = loadTuples(audioDirectory, imageDirectories, idList, true);
+    
+    // Global object to store ratings.
+    // allRatings[tupleIndex][imageSrc] = rating
+    const allRatings = {};
+    let currentPage = 0;
+    
+    /******************
+     * DOM References *
+     ******************/
+    const waveformContainer = document.getElementById('waveform');
+    const imagePairsContainer = document.getElementById('audio-image-pairs');
+    const pageInfo = document.getElementById('page-info');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const finishButton = document.getElementById('finish-button');
+    
+    /*******************************
+     * Initialize WaveSurfer (WS)  *
+     *******************************/
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ddd',
+      progressColor: '#2196F3',
+      height: 100,
+      barWidth: 2,
+      cursorWidth: 0, // Custom pointer only.
+      responsive: true,
+    });
+    const wavePointer = document.getElementById('wave-pointer');
+    
+    /**************************************
+     * Global Progress Update Function    *
+     **************************************/
+    function updateProgress(currentTime, duration) {
+      const progress = currentTime / duration;
+      document.querySelectorAll('.mask').forEach(mask => {
+        mask.style.width = `${(1 - progress) * 100}%`;
+      });
+      const waveformWidth = waveformContainer.clientWidth;
+      wavePointer.style.left = `${progress * waveformWidth}px`;
+      document.querySelectorAll('.image-pointer').forEach(pointer => {
+        const parentWidth = pointer.parentElement.clientWidth;
+        pointer.style.left = `${progress * parentWidth}px`;
+      });
+    }
+    
+    wavesurfer.on('ready', () => {
+      resetMasks();
+      updateProgress(0, wavesurfer.getDuration());
+    });
+    wavesurfer.on('audioprocess', (currentTime) => {
+      updateProgress(currentTime, wavesurfer.getDuration());
+    });
+    wavesurfer.on('seek', (progressValue) => {
+      updateProgress(progressValue * wavesurfer.getDuration(), wavesurfer.getDuration());
+    });
+    
+    function resetMasks() {
+      document.querySelectorAll('.mask').forEach(mask => {
+        mask.style.width = '100%';
+      });
+    }
+    
+    /********************
+     * Helper Functions *
+     ********************/
+    // Shuffle an array in place (Fisher–Yates)
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+    
+    // Check if the current page has been completely rated.
+    function checkCurrentPageRatingsComplete() {
+      const raters = document.querySelectorAll('.rater');
+      let complete = true;
+      raters.forEach(rater => {
+        if (!rater.querySelector('.selected')) {
+          complete = false;
+        }
+      });
+      nextPageBtn.disabled = !complete;
+      checkAllRatingsComplete();
+    }
+    
+    // Check if every tuple (across pages) is fully rated.
+    function checkAllRatingsComplete() {
+      let allComplete = true;
+      for (let i = 0; i < tuples.length; i++) {
+        const tuple = tuples[i];
+        if (!allRatings[i]) {
+          allComplete = false;
+          break;
+        }
+        tuple.images.forEach(imgObj => {
+          if (allRatings[i][imgObj.image] == null) {
+            allComplete = false;
+          }
+        });
+      }
+      finishButton.disabled = !allComplete;
+    }
+    
+    /************************************
+     * Rating Control Initialization    *
+     ************************************/
+    // When a star is clicked, update its visual selection and record the rating.
+    function initRatingListeners() {
+      document.querySelectorAll('.rater span').forEach(star => {
+        star.addEventListener('click', function() {
+          const rating = parseInt(this.getAttribute('data-value'));
+          const rater = this.parentElement;
+          rater.querySelectorAll('span').forEach(s => {
+            if (parseInt(s.getAttribute('data-value')) <= rating) {
+              s.classList.add('selected');
+            } else {
+              s.classList.remove('selected');
+            }
+          });
+          // Record the rating for this image.
+          const imageSrc = rater.getAttribute('data-image');
+          if (!allRatings[currentPage]) {
+            allRatings[currentPage] = {};
+          }
+          allRatings[currentPage][imageSrc] = rating;
+          checkCurrentPageRatingsComplete();
+        });
+      });
+    }
+    
+    /****************************
+     * Load a Tuple (Page)      *
+     ****************************/
+    function loadTuple(index) {
+      if (!tuples.length) return;
+      const tuple = tuples[index];
+      pageInfo.textContent = `Page ${index + 1} of ${tuples.length}`;
+      imagePairsContainer.innerHTML = '';
+      
+      // Clone and shuffle images so display order is randomized.
+      let images = tuple.images.slice();
+      // shuffleArray(images);
+      
+      images.forEach((data, idx) => {
+        const html = `
+          <div class="audio-image-pair">
+            <div class="container">
+              <div class="image-track">
+                <img src="${data.image}" alt="Image ${idx + 1}">
+                <div class="mask"></div>
+                <div class="image-pointer"></div>
+                <div class="rater" data-image="${data.image}">
+                  <span data-value="1">&#9734;</span>
+                  <span data-value="2">&#9734;</span>
+                  <span data-value="3">&#9734;</span>
+                  <span data-value="4">&#9734;</span>
+                  <span data-value="5">&#9734;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        imagePairsContainer.insertAdjacentHTML('beforeend', html);
+      });
+      
+      initRatingListeners();
+      nextPageBtn.disabled = true;
+      wavesurfer.load(tuple.audio);
+    }
+    
+    /********************************
+     * Pagination & Finish Controls *
+     ********************************/
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        loadTuple(currentPage);
+      }
+    });
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPage < tuples.length - 1) {
+        currentPage++;
+        loadTuple(currentPage);
+      }
+    });
+    
+    waveformContainer.addEventListener('click', () => {
+      wavesurfer.playPause();
+    });
+    
+    // Finish button: generate a CSV report including the rater's name and trigger download.
+    finishButton.addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      // CSV header now includes Rater.
+      csvContent += "Rater,TupleIndex,Audio,Image,Method,Rating\r\n";
+      for (let i = 0; i < tuples.length; i++) {
+        const tuple = tuples[i];
+        const audioFile = tuple.audio;
+        tuple.images.forEach(imgObj => {
+          const imageFile = imgObj.image;
+          // Derive method from image path: extract the parent directory name.
+          let method = "";
+          let parts = imageFile.split("/").filter(Boolean);
+          if (parts.length >= 2) {
+            method = parts[parts.length - 2];
+          }
+          const rating = (allRatings[i] && allRatings[i][imageFile]) ? allRatings[i][imageFile] : "";
+          csvContent += `${raterName},${i + 1},${audioFile},${imageFile},${method},${rating}\r\n`;
+        });
+      }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${raterName}_ratings.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    
+    /**********************************
+     * Load the First Tuple on Page Load *
+     **********************************/
+    loadTuple(currentPage);
+  </script>
+</body>
+</html>
