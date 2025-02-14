@@ -306,7 +306,7 @@
     const audioDir = "./wav/V000_R_max_valid/";
     const jsonDir = "./json/disfluency_word_level_res/";
     let idList = [];
-    fetch("wav/output_part_2.scp")
+    fetch("./wav/output_part_2.scp")
       .then(response => {
         if (!response.ok) throw new Error("Error loading test.scp: " + response.statusText);
         return response.text();
@@ -739,7 +739,7 @@
       const groundIntervals = currentJsonData.words.interval;
       const totalDuration = groundIntervals[groundIntervals.length - 1][1];
       createUserTier(words, groundIntervals, totalDuration);
-      //displayTextgridResult();
+      // displayTextgridResult();
     }
     
     // Instead of a table, display a JSON-like result containing:
@@ -760,11 +760,40 @@
       resultDiv.innerHTML = "<h3>Textgrid Result</h3><pre>" + JSON.stringify(resultData, null, 2) + "</pre>";
       resultDiv.style.display = "block";
     }
+
+    // Save a JSON-like result containing:
+    // - word list,
+    // - intervals (from the JSON file),
+    // - disfluency label (binary list from user annotations)
+    // to resultsPerFile[fileId]
+    function saveTextgridResult() {
+      const words = currentJsonData.words.sentence;
+      const intervals = currentJsonData.words.interval;
+      // Create binary list from userWordAnnotationFlags (1 if annotated, 0 otherwise)
+      const disfluencyLabels = userWordAnnotationFlags.map(flag => flag ? 1 : 0);
+      const resultData = {
+        words: words,
+        intervals: intervals,
+        disfluency_label: disfluencyLabels
+      };
+      resultsPerFile[idList[currentIndex]].textgridResult = JSON.stringify(resultData);
+    }
     
     /***********************
      * Confirm Button (Enables Next)
      ***********************/
     document.getElementById('confirm-button').addEventListener('click', () => {
+      // Save result in resultsPerFile
+      const fileId = idList[currentIndex];
+      resultsPerFile[fileId] = {
+        predicted_method: currentJsonData.predicted_method || "",
+        editorAnnotations: editorIntervals.concat(editorModeIntervals),
+        textgridResult: JSON.stringify({
+          words: currentJsonData.words.sentence,
+          intervals: currentJsonData.words.interval,
+          disfluency_label: userWordAnnotationFlags.map(flag => flag ? 1 : 0)
+        })
+      };
       document.getElementById('next-page').disabled = false;
     });
     
@@ -780,11 +809,6 @@
     
     document.getElementById('next-page').addEventListener('click', () => {
       if (currentIndex < idList.length - 1) {
-        const fileId = idList[currentIndex];
-        resultsPerFile[fileId] = {
-          predicted_method: currentJsonData.predicted_method || "",
-          editorAnnotations: editorIntervals.concat(editorModeIntervals)
-        };
         currentIndex++;
         loadCurrentFile();
       }
@@ -805,18 +829,40 @@
     
     document.getElementById('finish-button').addEventListener('click', () => {
       let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Rater,FileID,Predicted_Method,User_Annotations\r\n";
+      csvContent += "Rater,FileID,Predicted_Method,User_Annotations,Disfluency_Label,words\r\n";
       for (let fileId in resultsPerFile) {
         const res = resultsPerFile[fileId];
         const userAnnStr = (res.editorAnnotations || [])
-          .map(ann => `[${ann.start.toFixed(2)}-${ann.end.toFixed(2)}]`)
-          .join(" | ");
-        csvContent += `${raterName},${fileId},${res.predicted_method},"${userAnnStr}"\r\n`;
+        .map(ann => `[${ann.start.toFixed(2)}-${ann.end.toFixed(2)}]`)
+        .join(" | ");
+        // Log what is inside res
+        // console.log("Result for file", fileId, ":", res);
+        // log the textgrid result
+        console.log("Textgrid result for file", fileId, ":", res.textgridResult);
+        let disfluencyLabel = "";
+        if (res.textgridResult) {
+          try {
+            const obj = JSON.parse(res.textgridResult);
+            disfluencyLabel = obj.disfluency_label.join(" ");
+          } catch (error) {
+            disfluencyLabel = "";
+          }
+        }
+        let words = "";
+        if (res.textgridResult) {
+          try {
+            const obj = JSON.parse(res.textgridResult);
+            words = obj.words.join(" ");
+          } catch (error) {
+            words = "";
+          }
+        }
+        csvContent += `${raterName},${fileId},${res.predicted_method},"${userAnnStr}","${disfluencyLabel}", "${words}"\r\n`;
       }
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${raterName}_results_2.csv`);
+      link.setAttribute("download", `${raterName}_results_test_2.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
