@@ -17,7 +17,8 @@
       text-align: center;
       padding: 50px;
     }
-    #start-page input[type="text"] {
+    #start-page input[type="text"],
+    #start-page input[type="number"] {
       padding: 10px;
       font-size: 16px;
       width: 300px;
@@ -56,6 +57,16 @@
       font-size: 20px;
       margin-bottom: 10px;
     }
+    /* Delay Control Panel on Experiment Page */
+    #delay-panel {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    #delay-panel input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      font-size: 16px;
+    }
     /* Waveform Block */
     #waveform {
       position: relative;
@@ -92,6 +103,16 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
+    }
+    /* Editing Mode Control Panel */
+    #edit-mode-panel {
+      margin: 10px 0;
+      display: none;
+      text-align: center;
+    }
+    #edit-mode-panel label {
+      margin: 0 10px;
+      font-size: 16px;
     }
     /* Annotation (Textgrid) Block */
     #annotation-block {
@@ -216,6 +237,13 @@
       background-color: rgba(255, 200, 0, 0.3);
       pointer-events: none;
     }
+    /* Annotation interval overlays */
+    .annotation-overlay {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -225,6 +253,11 @@
     <p>Please enter your name to begin:</p>
     <input type="text" id="rater-name" placeholder="Your Name">
     <br>
+    <!-- Extra Option: Delay (in seconds) -->
+    <label>
+      Delay (sec; default 0.3):
+      <input type="number" id="delay-input" value="0.3" step="0.1" min="0">
+    </label>
     <!-- Options -->
     <label><input type="checkbox" id="toggle-method-labels"> Show Method Labels</label>
     <label><input type="checkbox" id="shuffle-methods"> Shuffle Methods</label>
@@ -244,18 +277,62 @@
   
   <!-- Experiment Page -->
   <div id="experiment-page">
-    <!-- Instructions -->
-    <div id="instructions">
-      <p><strong>Step 1:</strong> Play the audio and <em>click & hold</em> the "Annotate" button to mark your annotation while listening.<br>
-         (Editing button is disabled until you finish listening.)</p>
-      <p><strong>Step 2:</strong> When the audio is finished, your annotation and a textgrid (with timestamps) will be displayed.</p>
-      <p><strong>Step 3.1:</strong> If you are satisfied, click the <strong>Confirm</strong> button (the Next button remains inactive until Confirm is clicked).<br>
-         <strong>Step 3.2:</strong> If not, click <strong>Start Editing</strong> to adjust your annotation. In editing mode the Annotate button is re-enabled and the textgrid becomes interactive. When finished, click Confirm to update the result.</p>
-      <p><strong>Step 4:</strong> Click Next for the next annotation.</p>
-      <p><strong>Step 5:</strong> After finishing all annotations, click "Finish & Download CSV" to download the CSV file.</p>
-      <p><strong>Please send this file to: <a href="mailto:kevingenghaopeng@g.ecc.u-tokyo.ac.jp">kevingenghaopeng@g.ecc.u-tokyo.ac.jp</a>.
-    </div>
+    <p>
+      <strong>Step 1:</strong> Play the audio and <em>click & hold</em> the "Annotate" button to mark your annotation while listening.
+    </p>
+    <p style="color: red;">
+      (A delay of <span id="display-delay">0.3</span> sec is applied.)
+    </p>
+    <p>
+      <strong>Step 2:</strong> When the audio is finished (and after the delay), your annotation and a textgrid (with timestamps) will be displayed.
+    </p>
+    <p>
+      <strong>Step 3.1:</strong> If you are satisfied, click the <strong>Confirm</strong> button (the Next button remains inactive until Confirm is clicked).
+    </p>
+    <p>
+      <strong>Step 3.2:</strong> If not, click <strong>Start Editing</strong> to adjust your annotation. In editing mode, you can choose among three modes:
+    </p>
+    <ul style="text-align: left;">
+      <li>
+        <strong>Add mode:</strong> Add segments (for example, if a word seems to be cut off because it ended too soon, you can add it back).
+      </li>
+      <li>
+        <strong>Erase mode:</strong> Remove mis‐added intervals by clicking them.
+      </li>
+      <li>
+        <strong>Slide mode:</strong> Shift all intervals holistically. (This will update your default delay.)
+      </li>
+    </ul>
+    <p>
+      <strong>
+        NOTE:
+      </strong>
+      A text sequence will be provided to help you locate which word you do not understand. 
+      <p>
+      However, we <strong style="color:red;"> DO NOT</strong> guarantee that the word always corresponds to the waveform.
+      </p>
+    </p>
+    <p>
+        If misalignment occurs, please focus on the  <strong style="color:red;">WAVEFORM INTERVAL</strong> believe is unintelligible—even if the text sequence does not show the corresponding annotation.
+    </p>
+    <p>
+      <strong>Step 4:</strong> Click Next for the next annotation.
+    </p>
+    <p>
+      <strong>Step 5:</strong> After finishing all annotations, click "Finish & Download CSV" to download the CSV file.
+    </p>
+    <p>
+      <strong>Please send this file to: <a href="mailto:kevingenghaopeng@g.ecc.u-tokyo.ac.jp">kevingenghaopeng@g.ecc.u-tokyo.ac.jp</a>.</strong>
+    </p>
+    
+    <!-- File Info and Delay Control -->
     <div id="file-id"></div>
+    <div id="delay-panel">
+      Adjust Delay (sec):
+      <input type="number" id="edit-delay-input" value="0.3" step="0.1" min="0">
+      <span>(Current: <span id="current-delay">0.30</span> sec)</span>
+    </div>
+    
     <!-- Waveform Block -->
     <div id="waveform">
       <div id="cursor"></div>
@@ -268,6 +345,12 @@
     <div id="controls" style="text-align: center;">
       <button id="annotate-button" class="large-btn">Click & Hold to Annotate</button>
       <button id="edit-annotations-button" class="large-btn" disabled>Start Editing</button>
+    </div>
+    <!-- Editing Mode Control Panel -->
+    <div id="edit-mode-panel">
+      <label><input type="radio" name="edit-mode" value="add" checked> Add Mode</label>
+      <label><input type="radio" name="edit-mode" value="erase"> Erase Mode</label>
+      <label><input type="radio" name="edit-mode" value="slide"> Slide Mode</label>
     </div>
     <!-- Confirm Block -->
     <div id="confirm-block" style="text-align: center; display: none;">
@@ -335,9 +418,10 @@
     let currentIndex = 0;
     let currentJsonData = null;
     let raterName = "";
-    // Annotation intervals (in seconds)
-    let editorIntervals = [];       // from Phase 1 (normal annotation)
-    let editorModeIntervals = [];   // from Phase 2 (editing mode)
+    // Global delay (in seconds)
+    let delay = 0.3;
+    // Use one array for all recorded intervals (each interval: {start, end})
+    let recordedIntervals = [];
     // Per-word annotation flags (true = annotated)
     let userWordAnnotationFlags = [];
     // Object to store results for each file
@@ -348,7 +432,9 @@
     let globalShuffleMethods = false;
     let globalSelectedMethods = null;
     
-    let isEditorMode = false;  // flag for editing mode
+    // Editing mode flag & type ("add", "erase", "slide")
+    let isEditing = false;
+    let currentEditMode = "add";  // default editing mode
     
     const STORAGE_KEY = "disfluencyProgress";
     
@@ -381,6 +467,10 @@
      * Start Page Interaction
      ***********************/
     window.addEventListener('load', () => {
+      // Update display of delay value
+      document.getElementById('display-delay').textContent = delay.toFixed(2);
+      document.getElementById('edit-delay-input').value = delay.toFixed(2);
+      
       if (localStorage.getItem(STORAGE_KEY)) {
         document.getElementById('saved-progress-section').style.display = 'block';
         document.getElementById('start-experiment').style.display = 'none';
@@ -405,10 +495,15 @@
         globalShowMethodLabels = savedData.globalShowMethodLabels;
         globalShuffleMethods = savedData.globalShuffleMethods;
         globalSelectedMethods = savedData.globalSelectedMethods;
+        delay = savedData.delay || 0.3;
         document.getElementById('rater-name').value = raterName;
         document.getElementById('toggle-method-labels').checked = globalShowMethodLabels;
         document.getElementById('shuffle-methods').checked = globalShuffleMethods;
         document.getElementById('selected-methods').value = globalSelectedMethods ? globalSelectedMethods.join(', ') : "";
+        document.getElementById('delay-input').value = delay;
+        document.getElementById('display-delay').textContent = delay.toFixed(2);
+        document.getElementById('edit-delay-input').value = delay.toFixed(2);
+        document.getElementById('current-delay').textContent = delay.toFixed(2);
         document.getElementById('start-page').style.display = 'none';
         document.getElementById('experiment-page').style.display = 'block';
         loadCurrentFile();
@@ -430,6 +525,12 @@
       } else {
         globalSelectedMethods = null;
       }
+      // Set delay from input.
+      delay = parseFloat(document.getElementById('delay-input').value) || 0.3;
+      document.getElementById('display-delay').textContent = delay.toFixed(2);
+      document.getElementById('edit-delay-input').value = delay.toFixed(2);
+      document.getElementById('current-delay').textContent = delay.toFixed(2);
+      
       localStorage.removeItem(STORAGE_KEY);
       document.getElementById('start-page').style.display = 'none';
       document.getElementById('experiment-page').style.display = 'block';
@@ -437,16 +538,33 @@
     });
     
     /***********************
+     * Update delay when user edits it on experiment page
+     ***********************/
+    document.getElementById('edit-delay-input').addEventListener('change', (e) => {
+      let newDelay = parseFloat(e.target.value);
+      if (isNaN(newDelay) || newDelay < 0) {
+        newDelay = 0;
+      }
+      delay = newDelay;
+      document.getElementById('current-delay').textContent = delay.toFixed(2);
+      document.getElementById('display-delay').textContent = delay.toFixed(2);
+      console.log("Updated delay to:", delay);
+    });
+    
+    /***********************
      * LOAD CURRENT FILE
      ***********************/
     function loadCurrentFile() {
+      // Reset editing state and intervals
+      isEditing = false;
+      currentEditMode = "add";
+      recordedIntervals = [];
+      
       const fileId = idList[currentIndex];
       document.getElementById('file-id').textContent = "File ID: " + fileId + "  (Hit Space Bar to Play/Pause)";
       document.getElementById('page-info').textContent = "File " + (currentIndex + 1) + " of " + idList.length;
       document.getElementById('results').style.display = 'none';
       // Clear previous annotation results and textgrid result.
-      editorIntervals = [];
-      editorModeIntervals = [];
       document.getElementById('textgrid-result').innerHTML = "";
       document.getElementById('textgrid-result').style.display = "none";
       // Clear annotation block content.
@@ -464,8 +582,8 @@
       wordOverlays.style.pointerEvents = "none";
       document.getElementById('draw-overlay').appendChild(wordOverlays);
       
-      // Ensure editing mode is off.
-      isEditorMode = false;
+      // Hide editing controls.
+      document.getElementById('edit-mode-panel').style.display = "none";
       document.getElementById('edit-annotations-button').textContent = "Start Editing";
       document.getElementById('edit-annotations-button').disabled = true;  // remain disabled until audio finishes
       document.getElementById('draw-overlay').style.pointerEvents = "none";
@@ -497,38 +615,43 @@
     
     /***********************
      * When Audio Finishes (Phase 1):
-     * Display annotation result and textgrid; enable Confirm button and Edit button.
+     * Display annotation result and, after the delay, show textgrid result.
+     * Then, enable Confirm and Edit button.
      ***********************/
     wavesurfer.on('finish', () => {
       // Always display results regardless of whether an annotation interval was recorded.
       displayResults();
-      document.getElementById('annotate-button').disabled = true;
-      // Show Confirm block.
-      document.getElementById('confirm-block').style.display = "block";
-      // Enable editing button.
-      document.getElementById('edit-annotations-button').disabled = false;
+      // Wait for the specified delay (in seconds) before showing the textgrid result.
+      setTimeout(() => {
+        // displayTextgridResult();
+        document.getElementById('annotate-button').disabled = true;
+        // Show Confirm block.
+        document.getElementById('confirm-block').style.display = "block";
+        // Enable editing button.
+        document.getElementById('edit-annotations-button').disabled = false;
+      }, delay * 1000);
     });
     
     /***********************
      * Normal Annotation (Phase 1)
+     * Adjust intervals by subtracting the current delay.
      ***********************/
     let annotationStartTime = 0;
     let annotationIntervalID = null;
     let currentOverlay = null;
     
     document.getElementById('annotate-button').addEventListener('mousedown', () => {
-      if (isEditorMode) return;
-      annotationStartTime = wavesurfer.getCurrentTime();
+      if (isEditing) return;
+      // Adjust start time with delay compensation
+      annotationStartTime = Math.max(0, wavesurfer.getCurrentTime() - delay);
       currentOverlay = document.createElement('div');
-      currentOverlay.style.position = 'absolute';
-      currentOverlay.style.top = '0';
-      currentOverlay.style.height = '100%';
+      currentOverlay.className = "annotation-overlay";
       currentOverlay.style.backgroundColor = 'rgba(0, 150, 136, 0.3)';
       currentOverlay.style.border = '1px solid #009688';
       currentOverlay.style.pointerEvents = 'none';
       document.getElementById('draw-overlay').appendChild(currentOverlay);
       annotationIntervalID = setInterval(() => {
-        const currentTime = wavesurfer.getCurrentTime();
+        const currentTime = Math.max(0, wavesurfer.getCurrentTime() - delay);
         const dur = wavesurfer.getDuration();
         const wWidth = wavesurfer.drawer.wrapper.clientWidth;
         const startX = (annotationStartTime / dur) * wWidth;
@@ -541,10 +664,9 @@
     document.getElementById('annotate-button').addEventListener('mouseup', () => {
       if (!currentOverlay) return;
       clearInterval(annotationIntervalID);
-      annotationIntervalID = null;
-      const annotationEndTime = wavesurfer.getCurrentTime();
+      const annotationEndTime = Math.max(0, wavesurfer.getCurrentTime() - delay);
       if (annotationEndTime > annotationStartTime) {
-        editorIntervals.push({ start: annotationStartTime, end: annotationEndTime });
+        recordedIntervals.push({ start: annotationStartTime, end: annotationEndTime });
         console.log("Recorded annotation:", { start: annotationStartTime, end: annotationEndTime });
       }
       currentOverlay = null;
@@ -553,10 +675,9 @@
     document.getElementById('annotate-button').addEventListener('mouseleave', () => {
       if (currentOverlay) {
         clearInterval(annotationIntervalID);
-        annotationIntervalID = null;
-        const annotationEndTime = wavesurfer.getCurrentTime();
+        const annotationEndTime = Math.max(0, wavesurfer.getCurrentTime() - delay);
         if (annotationEndTime > annotationStartTime) {
-          editorIntervals.push({ start: annotationStartTime, end: annotationEndTime });
+          recordedIntervals.push({ start: annotationStartTime, end: annotationEndTime });
         }
         currentOverlay = null;
       }
@@ -566,29 +687,29 @@
      * Editing Mode Toggle (Phase 2)
      ***********************/
     document.getElementById('edit-annotations-button').addEventListener('click', () => {
-      isEditorMode = !isEditorMode;
-      if (isEditorMode) {
+      isEditing = !isEditing;
+      if (isEditing) {
         // Enter editing mode:
         document.getElementById('edit-annotations-button').textContent = "Finish Editing";
         document.getElementById('draw-overlay').style.pointerEvents = "auto";
         document.body.style.backgroundColor = "#e0f7fa";
-        // Re-enable annotation and textgrid interaction.
+        // Re-enable annotation button and textgrid interactivity in add mode.
         document.getElementById('annotate-button').disabled = false;
         document.getElementById('editor-content').style.pointerEvents = "auto";
+        // Show editing mode controls.
+        document.getElementById('edit-mode-panel').style.display = "block";
       } else {
         // Exit editing mode:
         document.getElementById('edit-annotations-button').textContent = "Start Editing";
         document.getElementById('draw-overlay').style.pointerEvents = "none";
         document.body.style.backgroundColor = "#ffffff";
-        if (editorModeIntervals.length > 0) {
-          editorIntervals = editorIntervals.concat(editorModeIntervals);
-          editorModeIntervals = [];
-        }
+        // Hide editing mode controls.
+        document.getElementById('edit-mode-panel').style.display = "none";
+        // After finishing editing, re-render the persistent overlays.
+        renderRecordedIntervalsOverlays();
         initializeUserWordAnnotations();
         renderUserTier();
-        updateWaveformWordOverlays();
-        // displayTextgridResult();
-        // Disable editing interactivity after finishing editing.
+        // Disable annotation button and textgrid interactivity.
         document.getElementById('annotate-button').disabled = true;
         document.getElementById('editor-content').style.pointerEvents = "none";
         // Show Confirm block so user can click Confirm to enable Next.
@@ -596,56 +717,159 @@
       }
     });
     
+    // Update currentEditMode when user selects an editing mode.
+    document.querySelectorAll('input[name="edit-mode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        currentEditMode = e.target.value;
+        console.log("Editing mode set to:", currentEditMode);
+      });
+    });
+    
     /***********************
      * Editing Mode Drawing on Waveform (Phase 2)
      ***********************/
     const drawOverlay = document.getElementById('draw-overlay');
-    let editorModeStartX = 0;
-    let editorModeCurrentOverlay = null;
+    let editModeStartX = 0;
+    let editModeCurrentOverlay = null;
+    let slideIndicator = null;
     
+    // For Add mode: similar to normal annotation drawing
     drawOverlay.addEventListener('mousedown', (e) => {
-      if (!isEditorMode) return;
+      if (!isEditing) return;
       const overlayRect = drawOverlay.getBoundingClientRect();
-      editorModeStartX = e.pageX - overlayRect.left;
-      editorModeCurrentOverlay = document.createElement('div');
-      editorModeCurrentOverlay.style.position = 'absolute';
-      editorModeCurrentOverlay.style.top = '0';
-      editorModeCurrentOverlay.style.height = '100%';
-      editorModeCurrentOverlay.style.backgroundColor = 'rgba(0, 0, 255, 0.3)';
-      editorModeCurrentOverlay.style.border = '1px solid blue';
-      editorModeCurrentOverlay.style.left = editorModeStartX + 'px';
-      drawOverlay.appendChild(editorModeCurrentOverlay);
+      const offsetX = e.pageX - overlayRect.left;
+      
+      if (currentEditMode === "add") {
+        editModeStartX = offsetX;
+        editModeCurrentOverlay = document.createElement('div');
+        editModeCurrentOverlay.className = "annotation-overlay";
+        editModeCurrentOverlay.style.backgroundColor = 'rgba(0, 0, 255, 0.3)';
+        editModeCurrentOverlay.style.border = '1px solid blue';
+        editModeCurrentOverlay.style.left = editModeStartX + 'px';
+        drawOverlay.appendChild(editModeCurrentOverlay);
+      } else if (currentEditMode === "slide") {
+        // For Slide mode, record starting position and show a temporary indicator.
+        editModeStartX = offsetX;
+        slideIndicator = document.createElement('div');
+        slideIndicator.style.position = 'absolute';
+        slideIndicator.style.top = '0';
+        slideIndicator.style.height = '100%';
+        slideIndicator.style.width = '2px';
+        slideIndicator.style.backgroundColor = 'purple';
+        slideIndicator.style.left = editModeStartX + 'px';
+        drawOverlay.appendChild(slideIndicator);
+      }
     });
     
     drawOverlay.addEventListener('mousemove', (e) => {
-      if (!isEditorMode || !editorModeCurrentOverlay) return;
+      if (!isEditing) return;
       const overlayRect = drawOverlay.getBoundingClientRect();
-      let currentX = e.pageX - overlayRect.left;
-      let width = currentX - editorModeStartX;
-      if (width >= 0) {
-        editorModeCurrentOverlay.style.width = width + 'px';
-      } else {
-        editorModeCurrentOverlay.style.left = currentX + 'px';
-        editorModeCurrentOverlay.style.width = Math.abs(width) + 'px';
+      const currentX = e.pageX - overlayRect.left;
+      
+      if (currentEditMode === "add" && editModeCurrentOverlay) {
+        let width = currentX - editModeStartX;
+        if (width >= 0) {
+          editModeCurrentOverlay.style.width = width + 'px';
+        } else {
+          editModeCurrentOverlay.style.left = currentX + 'px';
+          editModeCurrentOverlay.style.width = Math.abs(width) + 'px';
+        }
+      } else if (currentEditMode === "slide" && slideIndicator) {
+        // Move the slide indicator with the mouse.
+        slideIndicator.style.left = currentX + 'px';
       }
     });
     
     drawOverlay.addEventListener('mouseup', (e) => {
-      if (!isEditorMode || !editorModeCurrentOverlay) return;
+      if (!isEditing) return;
       const overlayRect = drawOverlay.getBoundingClientRect();
-      let endX = e.pageX - overlayRect.left;
-      let startX = Math.min(editorModeStartX, endX);
-      let endXCorrect = Math.max(editorModeStartX, endX);
+      const endX = e.pageX - overlayRect.left;
       const wWidth = wavesurfer.drawer.wrapper.clientWidth;
       const duration = wavesurfer.getDuration();
-      let startTime = (startX / wWidth) * duration;
-      let endTime = (endXCorrect / wWidth) * duration;
-      editorModeIntervals.push({ start: startTime, end: endTime });
-      editorModeCurrentOverlay = null;
-      initializeUserWordAnnotations();
-      renderUserTier();
-      updateWaveformWordOverlays();
+      
+      if (currentEditMode === "add" && editModeCurrentOverlay) {
+        let startX = Math.min(editModeStartX, endX);
+        let endXCorrect = Math.max(editModeStartX, endX);
+        let startTime = (startX / wWidth) * duration;
+        let endTime = (endXCorrect / wWidth) * duration;
+        recordedIntervals.push({ start: startTime, end: endTime });
+        editModeCurrentOverlay = null;
+        renderRecordedIntervalsOverlays();
+        initializeUserWordAnnotations();
+        renderUserTier();
+      } else if (currentEditMode === "slide" && slideIndicator) {
+        // Calculate time shift based on the difference.
+        let deltaX = endX - editModeStartX;
+        let deltaTime = (deltaX / wWidth) * duration;
+        // Shift all recorded intervals.
+        recordedIntervals = recordedIntervals.map(interval => {
+          return { start: Math.max(0, interval.start + deltaTime), end: Math.max(0, interval.end + deltaTime) };
+        });
+        // Update the global delay accordingly.
+        delay += deltaTime;
+        document.getElementById('edit-delay-input').value = delay.toFixed(2);
+        document.getElementById('current-delay').textContent = delay.toFixed(2);
+        document.getElementById('display-delay').textContent = delay.toFixed(2);
+        slideIndicator.remove();
+        slideIndicator = null;
+        renderRecordedIntervalsOverlays();
+        initializeUserWordAnnotations();
+        renderUserTier();
+      }
     });
+    
+    // For Erase mode: allow clicking on an existing overlay to remove it.
+    drawOverlay.addEventListener('click', (e) => {
+      if (!isEditing || currentEditMode !== "erase") return;
+      // Determine click position.
+      const overlayRect = drawOverlay.getBoundingClientRect();
+      const clickX = e.pageX - overlayRect.left;
+      const wWidth = wavesurfer.drawer.wrapper.clientWidth;
+      const duration = wavesurfer.getDuration();
+      const clickTime = (clickX / wWidth) * duration;
+      // Find and remove any interval that contains this time.
+      const beforeCount = recordedIntervals.length;
+      recordedIntervals = recordedIntervals.filter(interval => !(clickTime >= interval.start && clickTime <= interval.end));
+      if (recordedIntervals.length < beforeCount) {
+        renderRecordedIntervalsOverlays();
+        initializeUserWordAnnotations();
+        renderUserTier();
+      }
+    });
+    
+    /***********************
+     * Render persistent overlays for recorded intervals
+     ***********************/
+    function renderRecordedIntervalsOverlays() {
+      // Clear any overlays (except word overlays).
+      const overlaysContainer = document.getElementById('draw-overlay');
+      // Remove any child with class "annotation-overlay" (but leave the word overlays container).
+      Array.from(overlaysContainer.children).forEach(child => {
+        if (child.id !== "word-overlays") {
+          child.remove();
+        }
+      });
+      const wWidth = wavesurfer.drawer.wrapper.clientWidth;
+      const duration = wavesurfer.getDuration();
+      recordedIntervals.forEach(interval => {
+        const leftPercent = (interval.start / duration) * 100;
+        const widthPercent = ((interval.end - interval.start) / duration) * 100;
+        const overlay = document.createElement('div');
+        overlay.className = "annotation-overlay";
+        // Color it differently to show it is confirmed.
+        overlay.style.backgroundColor = 'rgba(0, 150, 136, 0.3)';
+        overlay.style.border = '1px solid #009688';
+        overlay.style.left = leftPercent + '%';
+        overlay.style.width = widthPercent + '%';
+        // In erase mode, let overlays be clickable.
+        if (isEditing && currentEditMode === "erase") {
+          overlay.style.pointerEvents = "auto";
+        } else {
+          overlay.style.pointerEvents = "none";
+        }
+        document.getElementById('draw-overlay').appendChild(overlay);
+      });
+    }
     
     /***********************
      * Per-word Annotation Functions
@@ -654,10 +878,10 @@
       const words = currentJsonData.words.sentence;
       const intervals = currentJsonData.words.interval;
       userWordAnnotationFlags = new Array(words.length).fill(false);
-      const combinedIntervals = editorIntervals.concat(editorModeIntervals);
+      // Use recordedIntervals (which already include any editing adjustments)
       words.forEach((word, i) => {
         const mid = (intervals[i][0] + intervals[i][1]) / 2;
-        combinedIntervals.forEach(interval => {
+        recordedIntervals.forEach(interval => {
           if (mid >= interval.start && mid <= interval.end) {
             userWordAnnotationFlags[i] = true;
           }
@@ -681,7 +905,7 @@
         span.textContent = word;
         span.style.left = leftPercent + '%';
         span.style.width = widthPercent + '%';
-        if (isEditorMode) {
+        if (isEditing) {
           span.style.pointerEvents = "auto";
           span.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -698,7 +922,7 @@
     }
     
     function toggleWordAnnotation(index) {
-      if (!isEditorMode) return;
+      if (!isEditing) return;
       userWordAnnotationFlags[index] = !userWordAnnotationFlags[index];
       renderUserTier();
       updateWaveformWordOverlays();
@@ -709,7 +933,6 @@
       overlaysContainer.innerHTML = "";
       const intervals = currentJsonData.words.interval;
       const totalDuration = intervals[intervals.length - 1][1];
-      const wWidth = wavesurfer.drawer.wrapper.clientWidth;
       
       userWordAnnotationFlags.forEach((flag, idx) => {
         if (flag) {
@@ -739,42 +962,36 @@
       const groundIntervals = currentJsonData.words.interval;
       const totalDuration = groundIntervals[groundIntervals.length - 1][1];
       createUserTier(words, groundIntervals, totalDuration);
-      // displayTextgridResult();
+      // Optionally, you could call displayTextgridResult() here as well.
     }
     
-    // Instead of a table, display a JSON-like result containing:
-    // - word list,
-    // - intervals (from the JSON file),
-    // - disfluency label (binary list from user annotations)
+    // Display a JSON-like textgrid result after play is done.
+    // This result uses the current user annotations and the adjusted delay.
     function displayTextgridResult() {
       const words = currentJsonData.words.sentence;
       const intervals = currentJsonData.words.interval;
-      // Create binary list from userWordAnnotationFlags (1 if annotated, 0 otherwise)
       const disfluencyLabels = userWordAnnotationFlags.map(flag => flag ? 1 : 0);
       const resultData = {
         words: words,
         intervals: intervals,
-        disfluency_label: disfluencyLabels
+        disfluency_label: disfluencyLabels,
+        delayUsed: delay
       };
       const resultDiv = document.getElementById('textgrid-result');
       resultDiv.innerHTML = "<h3>Textgrid Result</h3><pre>" + JSON.stringify(resultData, null, 2) + "</pre>";
       resultDiv.style.display = "block";
     }
-
-    // Save a JSON-like result containing:
-    // - word list,
-    // - intervals (from the JSON file),
-    // - disfluency label (binary list from user annotations)
-    // to resultsPerFile[fileId]
+    
+    // Save a JSON-like result for the current file.
     function saveTextgridResult() {
       const words = currentJsonData.words.sentence;
       const intervals = currentJsonData.words.interval;
-      // Create binary list from userWordAnnotationFlags (1 if annotated, 0 otherwise)
       const disfluencyLabels = userWordAnnotationFlags.map(flag => flag ? 1 : 0);
       const resultData = {
         words: words,
         intervals: intervals,
-        disfluency_label: disfluencyLabels
+        disfluency_label: disfluencyLabels,
+        delayUsed: delay
       };
       resultsPerFile[idList[currentIndex]].textgridResult = JSON.stringify(resultData);
     }
@@ -783,15 +1000,15 @@
      * Confirm Button (Enables Next)
      ***********************/
     document.getElementById('confirm-button').addEventListener('click', () => {
-      // Save result in resultsPerFile
       const fileId = idList[currentIndex];
       resultsPerFile[fileId] = {
         predicted_method: currentJsonData.predicted_method || "",
-        editorAnnotations: editorIntervals.concat(editorModeIntervals),
+        editorAnnotations: recordedIntervals,
         textgridResult: JSON.stringify({
           words: currentJsonData.words.sentence,
           intervals: currentJsonData.words.interval,
-          disfluency_label: userWordAnnotationFlags.map(flag => flag ? 1 : 0)
+          disfluency_label: userWordAnnotationFlags.map(flag => flag ? 1 : 0),
+          delayUsed: delay
         })
       };
       document.getElementById('next-page').disabled = false;
@@ -821,43 +1038,38 @@
         resultsPerFile: resultsPerFile,
         globalShowMethodLabels: globalShowMethodLabels,
         globalShuffleMethods: globalShuffleMethods,
-        globalSelectedMethods: globalSelectedMethods
+        globalSelectedMethods: globalSelectedMethods,
+        delay: delay
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
       alert("Progress saved!");
     });
     
     document.getElementById('finish-button').addEventListener('click', () => {
+      // New CSV includes a Delay column.
       let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Rater,FileID,Predicted_Method,User_Annotations,Disfluency_Label,words\r\n";
+      csvContent += "Rater,FileID,Predicted_Method,User_Annotations,Disfluency_Label,words,Delay\r\n";
       for (let fileId in resultsPerFile) {
         const res = resultsPerFile[fileId];
         const userAnnStr = (res.editorAnnotations || [])
-        .map(ann => `[${ann.start.toFixed(2)}-${ann.end.toFixed(2)}]`)
-        .join(" | ");
-        // Log what is inside res
-        // console.log("Result for file", fileId, ":", res);
-        // log the textgrid result
-        console.log("Textgrid result for file", fileId, ":", res.textgridResult);
+          .map(ann => `[${ann.start.toFixed(2)}-${ann.end.toFixed(2)}]`)
+          .join(" | ");
         let disfluencyLabel = "";
+        let words = "";
+        let delayUsed = "";
         if (res.textgridResult) {
           try {
             const obj = JSON.parse(res.textgridResult);
             disfluencyLabel = obj.disfluency_label.join(" ");
+            words = obj.words.join(" ");
+            delayUsed = obj.delayUsed !== undefined ? obj.delayUsed.toFixed(2) : "";
           } catch (error) {
             disfluencyLabel = "";
-          }
-        }
-        let words = "";
-        if (res.textgridResult) {
-          try {
-            const obj = JSON.parse(res.textgridResult);
-            words = obj.words.join(" ");
-          } catch (error) {
             words = "";
+            delayUsed = "";
           }
         }
-        csvContent += `${raterName},${fileId},${res.predicted_method},"${userAnnStr}","${disfluencyLabel}", "${words}"\r\n`;
+        csvContent += `${raterName},${fileId},${res.predicted_method},"${userAnnStr}","${disfluencyLabel}", "${words}", "${delayUsed}"\r\n`;
       }
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -870,9 +1082,9 @@
     });
     
     /***********************
-     * Replay Button
+     * Replay Button (if needed)
      ***********************/
-    document.getElementById('replay-button').addEventListener('click', () => {
+    document.getElementById('replay-button') && document.getElementById('replay-button').addEventListener('click', () => {
       document.getElementById('draw-overlay').innerHTML = "";
       const wordOverlays = document.createElement('div');
       wordOverlays.id = "word-overlays";
@@ -884,8 +1096,7 @@
       wordOverlays.style.pointerEvents = "none";
       document.getElementById('draw-overlay').appendChild(wordOverlays);
       
-      editorIntervals = [];
-      editorModeIntervals = [];
+      recordedIntervals = [];
       document.getElementById('results').style.display = 'none';
       wavesurfer.stop();
       wavesurfer.play(0);
